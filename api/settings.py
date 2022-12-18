@@ -1,0 +1,1 @@
+MAX_API_TRIES = 1
