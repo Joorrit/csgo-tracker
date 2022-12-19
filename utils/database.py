@@ -3,11 +3,11 @@
 import mysql.connector
 from secret import MYSQL_DATABASE, MYSQL_HOST, MYSQL_PASSWORD, MYSQL_USER
 
-from api.item import Item
-from api.price_stamp import PriceStamp
-from api.position_size import PositionSize
-from api.purchase_price import PurchasePrice
-from api.order import Order
+from utils.item import Item
+from utils.price_stamp import PriceStamp
+from utils.position_size import PositionSize
+from utils.purchase_price import PurchasePrice
+from utils.order import Order
 
 class Database:
     "Database class to store items, prices and positions"
@@ -38,7 +38,7 @@ class Database:
     def insert_position_size(self, position_size: PositionSize):
         """Insert a position into the database."""
         self.cursor.execute("INSERT IGNORE INTO position_size VALUES (%s, %s)", (position_size.get_item_id(), position_size.get_position_size()))
-    
+
     def insert_purchase_price(self, purchase_price: PurchasePrice):
         """Insert a purchase price into the database."""
         self.cursor.execute("INSERT IGNORE INTO purchase_price VALUES (%s, %s)", (purchase_price.get_item_id(), purchase_price.get_purchase_price()))
