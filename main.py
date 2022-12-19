@@ -3,17 +3,18 @@ from api.exeptions.apiExeption import MaxRetries
 from api.item import Item
 from api.itemIds import itemIds
 
-db = Database("database.db")
+db = Database()
 
 def getInitialItems():
     for itemId in itemIds:
-        item = Item(itemId)
+        item = Item(itemId, "")
         try:
             item.fetchData()
         except MaxRetries:
             continue
         print(item)
         db.insertItem(item)
+    db.commit()
 
 
 def getAllSellPriceStamps():
@@ -34,6 +35,6 @@ def getSellPriceHistory(itemId):
         print(priceStamp)
 
 if __name__ == "__main__":
-    # init database
+    getInitialItems()
     getAllSellPriceStamps()
     getSellPriceHistory(next(db.getItems()).itemId)

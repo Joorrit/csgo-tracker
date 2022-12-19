@@ -5,6 +5,7 @@ from api.exeptions.apiExeption import MaxRetries
 
 from api.priceStamp import PriceStamp
 from api.settings import MAX_API_TRIES
+from api.utils import getTimestamp
 
 
 class Item:
@@ -68,7 +69,7 @@ class Item:
                 data = response.json()
                 price = float(data["data"]["items"][0]["price"])
                 lowestBargainPrice = float(data["data"]["items"][0]["lowest_bargain_price"])
-                return PriceStamp(self.itemId, price, lowestBargainPrice, time.time())
+                return PriceStamp(self.itemId, price, lowestBargainPrice, getTimestamp())
             except requests.JSONDecodeError as e:
                 print(statusCode)
                 print("JSONDecodeError: ", response)
