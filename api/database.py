@@ -21,27 +21,28 @@ class Database:
         self.connection = mydb
         self.cursor = mydb.cursor()
 
+
     def insertItem(self, item: Item):
-        self.cursor.execute("INSERT IGNORE INTO items VALUES (%s, %s)", (item.itemId, item.name))
+        self.cursor.execute("INSERT IGNORE INTO item VALUES (%s, %s)", (item.itemId, item.name))
 
     def insertPriceStamp(self, priceStamp: PriceStamp):
-        self.cursor.execute("INSERT INTO prices VALUES (%s, %s, %s, %s)", (priceStamp.get_item_id(), priceStamp.get_price(), priceStamp.get_lowest_bargain_price(), priceStamp.get_timestamp()))
+        self.cursor.execute("INSERT INTO price VALUES (%s, %s, %s, %s)", (priceStamp.get_item_id(), priceStamp.get_price(), priceStamp.get_lowest_bargain_price(), priceStamp.get_timestamp()))
     
     def insert_item(self, item: Item):
         """Insert an item into the database. If the item already exists, it will be ignored."""
-        self.cursor.execute("INSERT OR IGNORE INTO items VALUES (%s, %s)", (item.get_item_id(), item.get_name()))
+        self.cursor.execute("INSERT IGNORE INTO item VALUES (%s, %s)", (item.get_item_id(), item.get_name()))
 
     def insert_price_stamp(self, price_stamp: PriceStamp):
         """Insert a price stamp into the database."""
-        self.cursor.execute("INSERT INTO prices VALUES (%s, %s, %s, %s)", (price_stamp.get_item_id(), price_stamp.get_price(), price_stamp.get_lowest_bargain_price(), price_stamp.get_timestamp()))
+        self.cursor.execute("INSERT INTO price VALUES (%s, %s, %s, %s)", (price_stamp.get_item_id(), price_stamp.get_price(), price_stamp.get_lowest_bargain_price(), price_stamp.get_timestamp()))
 
     def insert_position_size(self, position_size: PositionSize):
         """Insert a position into the database."""
-        self.cursor.execute("INSERT OR IGNORE INTO position_size VALUES (%s, %s)", (position_size.get_item_id(), position_size.get_position_size()))
+        self.cursor.execute("INSERT IGNORE INTO position_size VALUES (%s, %s)", (position_size.get_item_id(), position_size.get_position_size()))
     
     def insert_purchase_price(self, purchase_price: PurchasePrice):
         """Insert a purchase price into the database."""
-        self.cursor.execute("INSERT OR IGNORE INTO purchase_price VALUES (%s, %s)", (purchase_price.get_item_id(), purchase_price.get_purchase_price()))
+        self.cursor.execute("INSERT IGNORE INTO purchase_price VALUES (%s, %s)", (purchase_price.get_item_id(), purchase_price.get_purchase_price()))
 
     def commit(self):
         """Commit the changes to the database."""
@@ -49,18 +50,18 @@ class Database:
 
     def get_item(self, item_id):
         """Get an item from the database."""
-        self.cursor.execute("SELECT item_id, name FROM items WHERE item_Id = %s", (item_id,))
+        self.cursor.execute("SELECT item_id, name FROM item WHERE item_id = %s", (item_id,))
         db_item_id, db_name = self.cursor.fetchone()
         return Item(db_item_id, db_name)
 
     def get_items(self):
         """Get all items from the database."""
-        self.cursor.execute("SELECT item_id, name FROM items")
+        self.cursor.execute("SELECT item_id, name FROM item")
         for db_item in self.cursor.fetchall():
             yield Item(db_item[0], db_item[1])
 
     def get_price_stamps(self, item_id):
         """Get all price stamps for an item from the database."""
-        self.cursor.execute("SELECT price, lowest_bargain_price, timestamp FROM prices WHERE item_id = %s", (item_id,))
+        self.cursor.execute("SELECT price, lowest_bargain_price, timestamp FROM price WHERE item_id = %s", (item_id,))
         for db_price_stamp in self.cursor.fetchall():
             yield PriceStamp(item_id, db_price_stamp[0], db_price_stamp[1], db_price_stamp[2])
