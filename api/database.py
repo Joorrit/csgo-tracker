@@ -25,7 +25,7 @@ class Database:
         self.cursor.execute("INSERT IGNORE INTO items VALUES (%s, %s)", (item.itemId, item.name))
 
     def insertPriceStamp(self, priceStamp: PriceStamp):
-        self.cursor.execute("INSERT INTO prices VALUES (%s, %s, %s, %s)", (priceStamp.getItemId(), priceStamp.getPrice(), priceStamp.getLowestBargainPrice(), priceStamp.getTimestamp()))
+        self.cursor.execute("INSERT INTO prices VALUES (%s, %s, %s, %s)", (priceStamp.get_item_id(), priceStamp.get_price(), priceStamp.get_lowest_bargain_price(), priceStamp.get_timestamp()))
     
     def insert_item(self, item: Item):
         """Insert an item into the database. If the item already exists, it will be ignored."""

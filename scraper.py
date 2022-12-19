@@ -1,17 +1,16 @@
 from api.database import Database
-from api.exeptions.apiExeption import MaxRetries
+from api.settings import MAX_API_TRIES
 from api.item import Item
-from api.itemIds import itemIds
 
 db = Database()
 
 def getAllSellPriceStamps():
-    items = db.getItems()
+    items = db.get_items()
     for item in items:
         print(item)
         try:
-            priceStamp = item.getSellPriceStamp()
-        except MaxRetries:
+            priceStamp = item.get_sell_price_stamp()
+        except MAX_API_TRIES:
             continue
         db.insertPriceStamp(priceStamp)
     db.commit()
