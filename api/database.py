@@ -10,8 +10,9 @@ from api.purchase_price import PurchasePrice
 from api.order import Order
 
 class Database:
+    "Database class to store items, prices and positions"
+
     def __init__(self):
-        "Database class to store items, prices and positions"
         mydb = mysql.connector.connect(
             host=MYSQL_HOST,
             user=MYSQL_USER,
