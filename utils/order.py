@@ -31,3 +31,13 @@ class Order:
     def get_order_type(self):
         "returns the position size of the position"
         return self.order_type
+    
+    def to_json(self):
+        "returns the position as json"
+        return {
+            "item_id": self.item_id,
+            "quantity": self.quantity,
+            "purchase_price": self.purchase_price,
+            "timestamp": self.timestamp,
+            "order_type": self.order_type
+        }

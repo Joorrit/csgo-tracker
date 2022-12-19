@@ -63,10 +63,9 @@ def insert_order(order: Order):
 if __name__ == "__main__":
     # init database
     #get_initial_items()
-    # df = pd.read_csv("Fund_Positions.csv", index_col=0)
-    # for index, row in df.iterrows():
-    #     insert_position_size(PositionSize(row.Item_ID,row["Position_Size"]))
-    #     insert_purchase_price(PurchasePrice(row.Item_ID,row["Position_purchase_price"]))
+    df = pd.read_csv("buy_order_history.csv", index_col=0)
+    for index, row in df.iterrows():
+        insert_order(Order(int(row["Item_IDs"]), int(row["Quantities"]), row["Prices"], get_timestamp(), "buy"))
 
     #get_all_sell_price_stamps()
     #get_sell_price_history(next(db.getItems()).itemId)

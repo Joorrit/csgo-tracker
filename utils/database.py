@@ -70,3 +70,9 @@ class Database:
         self.cursor.execute("SELECT price, highest_bargain_price, timestamp FROM price WHERE item_id = %s ORDER BY timestamp DESC LIMIT 1", (item_id,))
         db_price_stamp = self.cursor.fetchone()
         return PriceStamp(item_id, db_price_stamp[0], db_price_stamp[1], db_price_stamp[2])
+    
+    def get_order_stamps(self, item_id):
+        """Get all orders for an item from the database."""
+        self.cursor.execute("SELECT quantity, price, timestamp, order_type FROM `order` WHERE item_id = %s", (item_id,))
+        for db_order in self.cursor.fetchall():
+            yield Order(item_id, db_order[0], db_order[1], db_order[2], db_order[3])
