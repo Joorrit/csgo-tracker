@@ -17,4 +17,8 @@ class PositionSize:
     def get_position_size(self):
         " returns the position size of the position"
         return self.position_size
+    
+    def update_position_size(self, new_position_size):
+        "updates the position size of the position"
+        self.position_size = new_position_size
         
