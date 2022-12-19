@@ -5,4 +5,7 @@ import sqlite3
 
 connection = sqlite3.connect("database.db")
 cursor = connection.cursor()
-#cursor.execute("DROP TABLE IF EXISTS positions")
+cursor.execute("DROP TABLE IF EXISTS position_size")
+cursor.execute("DROP TABLE IF EXISTS prices")
+cursor.execute("DROP TABLE IF EXISTS purchase_price")
+cursor.execute("DROP TABLE IF EXISTS items")

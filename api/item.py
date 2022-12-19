@@ -1,6 +1,6 @@
 """Module for the item class"""
 
-import time
+import datetime
 import requests
 from api.exeptions.api_exeption import MaxRetries
 
@@ -18,12 +18,19 @@ class Item:
         self.name = name
 
     def __str__(self):
-        return f"Item: {self.name} ({self.itemId})"
+        return f"Item: {self.name} ({self.item_id})"
 
+    def get_item_id(self):
+        """Returns the item id"""
+        return self.item_id
+    
+    def get_name(self):
+        """Returns the name of the item"""
+        return self.name
 
     def get_buff_sell_order_api_link(self):
         """Returns the buff.163.com sell order api link"""
-        return f"https://buff.163.com/api/market/goods/sell_order?game=csgo&goods_id={self.itemId}&page_num=1&page_size=100"
+        return f"https://buff.163.com/api/market/goods/sell_order?game=csgo&goods_id={self.item_id}&page_num=1&page_size=100"
 
     def request_sell_orders_buff(self):
         """Requests the sell orders from buff.163.com"""
@@ -56,7 +63,7 @@ class Item:
                 if status_code != 200:
                     break
                 data = response.json()
-                self.name = data["data"]["goods_infos"][str(self.itemId)]["name"]
+                self.name = data["data"]["goods_infos"][str(self.item_id)]["name"]
                 return
             except requests.JSONDecodeError:
                 print(status_code)
@@ -76,7 +83,7 @@ class Item:
                 data = response.json()
                 price = float(data["data"]["items"][0]["price"])
                 lowest_bargain_price = float(data["data"]["items"][0]["lowest_bargain_price"])
-                return PriceStamp(self.itemId, price, lowest_bargain_price, time.time())
+                return PriceStamp(self.item_id, price, lowest_bargain_price, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             except requests.JSONDecodeError:
                 print(status_code)
                 print("JSONDecodeError: ", response)

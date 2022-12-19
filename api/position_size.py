@@ -1,7 +1,7 @@
 """Contains the Position class to represent a position
 in the fund using item id and position size."""
 
-class Position:
+class PositionSize:
     "Position class with item id and position size"
     def __init__(self, item_id, position_size):
         self.item_id = item_id

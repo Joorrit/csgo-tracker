@@ -4,7 +4,7 @@ import pandas as pd
 from api.database import Database
 from api.exeptions.api_exeption import MaxRetries
 from api.item import Item
-from api.position import Position
+from api.position_size import PositionSize
 from api.purchase_price import PurchasePrice
 from api.item_ids import item_ids
 
@@ -24,7 +24,8 @@ def get_initial_items():
 
 
 def get_all_sell_price_stamps():
-    """Get all sell price stamps for all items in the database."""
+    """Updates the value of all items in the database and saves item_id, sell price,
+    bargain price and the timestamp."""
     items = db.get_items()
     for item in items:
         print(item)
@@ -42,9 +43,9 @@ def get_sell_price_history(item_id):
     for price_stamp in db.get_price_stamps(item_id):
         print(price_stamp)
 
-def insert_position(position: Position):
+def insert_position_size(position: PositionSize):
     """Insert a position into the database."""
-    db.insert_position(position)
+    db.insert_position_size(position)
     db.commit()
 
 def insert_purchase_price(purchase_price: PurchasePrice):
@@ -54,9 +55,12 @@ def insert_purchase_price(purchase_price: PurchasePrice):
 
 if __name__ == "__main__":
     # init database
-    #getInitialItems()
-    df = pd.read_csv("Fund_Positions.csv", index_col=0)
-    for index, row in df.iterrows():
-        insert_purchase_price(PurchasePrice(row.Item_ID, row.Position_purchase_price))
-    #getAllSellPriceStamps()
-    #getSellPriceHistory(next(db.getItems()).itemId)
+    #get_initial_items()
+    # df = pd.read_csv("Fund_Positions.csv", index_col=0)
+    # for index, row in df.iterrows():
+    #     insert_position_size(PositionSize(row.Item_ID,row["Position_Size"]))
+    #     insert_purchase_price(PurchasePrice(row.Item_ID,row["Position_purchase_price"]))
+
+    get_all_sell_price_stamps()
+
+    #get_sell_price_history(next(db.getItems()).itemId)
