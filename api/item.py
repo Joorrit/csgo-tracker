@@ -1,29 +1,39 @@
-    
-import time
-import requests
-from api.exeptions.apiExeption import MaxRetries
+"""Module for the item class"""
 
-from api.priceStamp import PriceStamp
-from api.settings import MAX_API_TRIES
+import requests
+from api.exeptions.api_exeption import MaxRetries
+
+from api.price_stamp import PriceStamp
+from api.settings import MAX_API_TRIES, MAX_API_TIMEOUT
 from api.utils import getTimestamp
 
 
 class Item:
+    """Class for an item with an item_id and a name"""
     itemId = None
     name = None
 
-    def __init__(self, itemId, name):
-        self.itemId = itemId
+    def __init__(self, item_id, name = ""):
+        self.item_id = item_id
         self.name = name
 
     def __str__(self):
-        return f"Item: {self.name} ({self.itemId})"
+        return f"Item: {self.name} ({self.item_id})"
 
+    def get_item_id(self):
+        """Returns the item id"""
+        return self.item_id
+    
+    def get_name(self):
+        """Returns the name of the item"""
+        return self.name
 
-    def getBuffSellOrderApiLink(self):
-        return f"https://buff.163.com/api/market/goods/sell_order?game=csgo&goods_id={self.itemId}&page_num=1&page_size=100"
+    def get_buff_sell_order_api_link(self):
+        """Returns the buff.163.com sell order api link"""
+        return f"https://buff.163.com/api/market/goods/sell_order?game=csgo&goods_id={self.item_id}&page_num=1&page_size=100"
 
-    def requestSellOrdersBuff(self):
+    def request_sell_orders_buff(self):
+        """Requests the sell orders from buff.163.com"""
         headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
         'Accept-Language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
@@ -41,36 +51,41 @@ class Item:
         'sec-ch-ua-mobile': '?0',
         'sec-ch-ua-platform': '"Windows"'
         }
-        return requests.get(self.getBuffSellOrderApiLink(), headers=headers, data={})
-    
-    def fetchData(self):
+        return requests.get(self.get_buff_sell_order_api_link(), headers=headers, data={}, timeout=MAX_API_TIMEOUT)
+
+    def fetch_data(self):
+        """Fetches the item name from buff.163.com using the item id
+        and saves it in the name variable"""
         for _ in range(MAX_API_TRIES):
             try:
-                response = self.requestSellOrdersBuff() 
-                statusCode = response.status_code
-                if (statusCode != 200):
+                response = self.request_sell_orders_buff()
+                status_code = response.status_code
+                if status_code != 200:
                     break
                 data = response.json()
-                self.name = data["data"]["goods_infos"][str(self.itemId)]["name"]
+                self.name = data["data"]["goods_infos"][str(self.item_id)]["name"]
                 return
-            except requests.JSONDecodeError as e:
-                print(statusCode)
+            except requests.JSONDecodeError:
+                print(status_code)
                 print("JSONDecodeError: ", response)
 
         raise MaxRetries()
 
-    def getSellPriceStamp(self):
+    def get_sell_price_stamp(self):
+        """Returns a PriceStamp with the item id, current sell price,
+        the lowest bargain price and a tiemstamp"""
         for _ in range(MAX_API_TRIES):
             try:
-                response = self.requestSellOrdersBuff() 
-                statusCode = response.status_code
-                if (statusCode != 200):
+                response = self.request_sell_orders_buff()
+                status_code = response.status_code
+                if status_code != 200:
                     break
                 data = response.json()
                 price = float(data["data"]["items"][0]["price"])
-                lowestBargainPrice = float(data["data"]["items"][0]["lowest_bargain_price"])
-                return PriceStamp(self.itemId, price, lowestBargainPrice, getTimestamp())
-            except requests.JSONDecodeError as e:
-                print(statusCode)
+                lowest_bargain_price = float(data["data"]["items"][0]["lowest_bargain_price"])
+                return PriceStamp(self.item_id, price, lowest_bargain_price, getTimestamp())
+            except requests.JSONDecodeError:
+                print(status_code)
                 print("JSONDecodeError: ", response)
         raise MaxRetries()
+        
