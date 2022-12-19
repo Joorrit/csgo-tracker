@@ -1,11 +1,11 @@
 """Module for the item class"""
 
 import requests
-from api.exeptions.api_exeption import MaxRetries
+from utils.exeptions.api_exeption import MaxRetries
 
-from api.price_stamp import PriceStamp
-from api.settings import MAX_API_TRIES, MAX_API_TIMEOUT
-from api.utils import get_timestamp
+from utils.price_stamp import PriceStamp
+from utils.settings import MAX_API_TRIES, MAX_API_TIMEOUT
+from utils.utils import get_timestamp
 
 
 class Item:

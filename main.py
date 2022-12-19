@@ -1,14 +1,14 @@
 """Main file for the Fund Tracker"""
 
 import pandas as pd
-from api.database import Database
-from api.exeptions.api_exeption import MaxRetries
-from api.item import Item
-from api.position_size import PositionSize
-from api.purchase_price import PurchasePrice
-from api.order import Order
-from api.item_ids import item_ids
-from api.utils import get_timestamp
+from utils.database import Database
+from utils.exeptions.api_exeption import MaxRetries
+from utils.item import Item
+from utils.position_size import PositionSize
+from utils.purchase_price import PurchasePrice
+from utils.order import Order
+from utils.item_ids import item_ids
+from utils.utils import get_timestamp
 
 db = Database()
 
@@ -69,5 +69,5 @@ if __name__ == "__main__":
     #     insert_purchase_price(PurchasePrice(row.Item_ID,row["Position_purchase_price"]))
 
     #get_all_sell_price_stamps()
-
     #get_sell_price_history(next(db.getItems()).itemId)
+    pass

@@ -1,9 +1,9 @@
 """Gets executed to scrape the API for all items and insert them into the database"""
 
-from api.database import Database
+from utils.database import Database
 #from api.settings import MAX_API_TRIES
-from api.exeptions.api_exeption import MaxRetries
-from api.item import Item
+from utils.exeptions.api_exeption import MaxRetries
+from utils.item import Item
 
 db = Database()
 
@@ -22,3 +22,4 @@ def get_all_sell_price_stamps():
 
 if __name__ == "__main__":
     get_all_sell_price_stamps()
+    
