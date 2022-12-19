@@ -7,6 +7,7 @@ from api.item import Item
 from api.price_stamp import PriceStamp
 from api.position_size import PositionSize
 from api.purchase_price import PurchasePrice
+from api.order import Order
 
 class Database:
     def __init__(self):
@@ -21,6 +22,9 @@ class Database:
         self.connection = mydb
         self.cursor = mydb.cursor()
 
+    def insert_order(self, order: Order):
+        """Insert an order into the database."""
+        self.cursor.execute("INSERT INTO `order`(`item_id`, `quantity`, `price`, `timestamp`) VALUES (%s, %s, %s, %s)", (order.get_item_id(), order.get_quantity(), order.get_purchase_price(), order.get_timestamp()))
 
     def insertItem(self, item: Item):
         self.cursor.execute("INSERT IGNORE INTO item VALUES (%s, %s)", (item.itemId, item.name))

@@ -6,7 +6,9 @@ from api.exeptions.api_exeption import MaxRetries
 from api.item import Item
 from api.position_size import PositionSize
 from api.purchase_price import PurchasePrice
+from api.order import Order
 from api.item_ids import item_ids
+from api.utils import get_timestamp
 
 db = Database()
 
@@ -53,6 +55,11 @@ def insert_purchase_price(purchase_price: PurchasePrice):
     db.insert_purchase_price(purchase_price)
     db.commit()
 
+def insert_order(order: Order):
+    """Insert an order into the database."""
+    db.insert_order(order)
+    db.commit()
+
 if __name__ == "__main__":
     # init database
     #get_initial_items()
@@ -61,6 +68,6 @@ if __name__ == "__main__":
     #     insert_position_size(PositionSize(row.Item_ID,row["Position_Size"]))
     #     insert_purchase_price(PurchasePrice(row.Item_ID,row["Position_purchase_price"]))
 
-    get_all_sell_price_stamps()
+    #get_all_sell_price_stamps()
 
     #get_sell_price_history(next(db.getItems()).itemId)
