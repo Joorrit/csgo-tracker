@@ -24,14 +24,8 @@ class Database:
 
     def insert_order(self, order: Order):
         """Insert an order into the database."""
-        self.cursor.execute("INSERT INTO `order`(`item_id`, `quantity`, `price`, `timestamp`) VALUES (%s, %s, %s, %s)", (order.get_item_id(), order.get_quantity(), order.get_purchase_price(), order.get_timestamp()))
+        self.cursor.execute("INSERT INTO `order`(`item_id`, `quantity`, `price`, `timestamp`, `order_type`) VALUES (%s, %s, %s, %s, %s)", (order.get_item_id(), order.get_quantity(), order.get_purchase_price(), order.get_timestamp(), order.get_order_type()))
 
-    def insertItem(self, item: Item):
-        self.cursor.execute("INSERT IGNORE INTO item VALUES (%s, %s)", (item.itemId, item.name))
-
-    def insertPriceStamp(self, priceStamp: PriceStamp):
-        self.cursor.execute("INSERT INTO price VALUES (%s, %s, %s, %s)", (priceStamp.get_item_id(), priceStamp.get_price(), priceStamp.get_lowest_bargain_price(), priceStamp.get_timestamp()))
-    
     def insert_item(self, item: Item):
         """Insert an item into the database. If the item already exists, it will be ignored."""
         self.cursor.execute("INSERT IGNORE INTO item VALUES (%s, %s)", (item.get_item_id(), item.get_name()))
