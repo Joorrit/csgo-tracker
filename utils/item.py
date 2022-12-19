@@ -88,4 +88,10 @@ class Item:
                 print(status_code)
                 print("JSONDecodeError: ", response)
         raise MaxRetries()
-        
+    
+    def to_json(self):
+        """Returns a json representation of the item"""
+        return {
+            "item_id": self.item_id,
+            "name": self.name
+        }
