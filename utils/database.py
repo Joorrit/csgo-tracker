@@ -33,7 +33,7 @@ class Database:
 
     def insert_price_stamp(self, price_stamp: PriceStamp):
         """Insert a price stamp into the database."""
-        self.cursor.execute("INSERT INTO price VALUES (%s, %s, %s, %s)", (price_stamp.get_item_id(), price_stamp.get_price(), price_stamp.get_lowest_bargain_price(), price_stamp.get_timestamp()))
+        self.cursor.execute("INSERT INTO price VALUES (%s, %s, %s, %s)", (price_stamp.get_item_id(), price_stamp.get_price(), price_stamp.get_highest_bargain_price(), price_stamp.get_timestamp()))
 
     def insert_position_size(self, position_size: PositionSize):
         """Insert a position into the database."""
@@ -61,6 +61,6 @@ class Database:
 
     def get_price_stamps(self, item_id):
         """Get all price stamps for an item from the database."""
-        self.cursor.execute("SELECT price, lowest_bargain_price, timestamp FROM price WHERE item_id = %s", (item_id,))
+        self.cursor.execute("SELECT price, highest_bargain_price, timestamp FROM price WHERE item_id = %s", (item_id,))
         for db_price_stamp in self.cursor.fetchall():
             yield PriceStamp(item_id, db_price_stamp[0], db_price_stamp[1], db_price_stamp[2])

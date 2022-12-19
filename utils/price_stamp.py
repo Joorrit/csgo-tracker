@@ -2,23 +2,23 @@
 
 class PriceStamp:
     "Class for a price stamp of an item with item_id, price, lowest bargain price and timestamp"
-    def __init__(self, item_id, price, lowest_bargain_price, timestamp):
+    def __init__(self, item_id, price, highest_bargain_price, timestamp):
         self.item_id = item_id
         self.price = price
-        self.lowest_bargain_price = lowest_bargain_price
+        self.highest_bargain_price = highest_bargain_price
         self.timestamp = timestamp
 
     def __str__(self):
         return f"""Price: {self.item_id} Timestamp: {self.timestamp} Price: {self.price}
-                lowestBargainPrice. {self.lowest_bargain_price}"""
+                lowestBargainPrice. {self.highest_bargain_price}"""
 
     def get_price(self):
         "returns the price of the item"
         return self.price
 
-    def get_lowest_bargain_price(self):
+    def get_highest_bargain_price(self):
         "returns the lowest bargain price of the item"
-        return self.lowest_bargain_price
+        return self.highest_bargain_price
 
     def get_timestamp(self):
         "returns the timestamp of the price stamp"

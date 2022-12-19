@@ -82,8 +82,8 @@ class Item:
                     break
                 data = response.json()
                 price = float(data["data"]["items"][0]["price"])
-                lowest_bargain_price = float(data["data"]["items"][0]["lowest_bargain_price"])
-                return PriceStamp(self.item_id, price, lowest_bargain_price, get_timestamp())
+                highest_bargain_price = float(data["data"]["items"][0]["lowest_bargain_price"])
+                return PriceStamp(self.item_id, price, highest_bargain_price, get_timestamp())
             except requests.JSONDecodeError:
                 print(status_code)
                 print("JSONDecodeError: ", response)
