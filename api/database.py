@@ -1,42 +1,72 @@
-import sqlite3
+"""This module contains the Database class."""
 
+import sqlite3
 from api.item import Item
-from api.priceStamp import PriceStamp
+from api.price_stamp import PriceStamp
+from api.position import Position
+from api.purchase_price import PurchasePrice
 
 class Database:
+    "Database class to store items, prices and positions"
     def __init__(self, path):
         self.path = path
         self.connection = sqlite3.connect(path)
         self.cursor = self.connection.cursor()
-        self.createItemTable()
-        self.createPriceTable()
+        self.create_item_table()
+        self.create_price_table()
+        self.create_position_table()
+        self.create_purchase_price_table()
 
-    def createItemTable(self):
+    def create_item_table(self):
+        """Create the items table if it does not exist yet."""
         self.cursor.execute("CREATE TABLE IF NOT EXISTS items (itemId INTEGER PRIMARY KEY, name TEXT)")
 
-    def createPriceTable(self):
+    def create_price_table(self):
+        """Create the prices table if it does not exist yet."""
         self.cursor.execute("CREATE TABLE IF NOT EXISTS prices (itemId INTEGER, price REAL, lowestBargainPrice REAL, timestamp REAL)")
 
-    def insertItem(self, item: Item):
-        self.cursor.execute("INSERT INTO items VALUES (?, ?)", (item.itemId, item.name))
+    def create_position_table(self):
+        """Create the positions table if it does not exist yet."""
+        self.cursor.execute("CREATE TABLE IF NOT EXISTS positions (itemId INTEGER, position_size REAL)")
+    
+    def create_purchase_price_table(self):
+        """Create the purchase price table if it does not exist yet."""
+        self.cursor.execute("CREATE TABLE IF NOT EXISTS purchase_price (itemId INTEGER, purchase_price REAL)")
 
-    def insertPriceStamp(self, priceStamp: PriceStamp):
-        self.cursor.execute("INSERT INTO prices VALUES (?, ?, ?, ?)", (priceStamp.getItemId(), priceStamp.getPrice(), priceStamp.getLowestBargainPrice(), priceStamp.getTimestamp()))
+    def insert_item(self, item: Item):
+        """Insert an item into the database. If the item already exists, it will be ignored."""
+        self.cursor.execute("INSERT OR IGNORE INTO items VALUES (?, ?)", (item.itemId, item.name))
+
+    def insert_price_stamp(self, price_stamp: PriceStamp):
+        """Insert a price stamp into the database."""
+        self.cursor.execute("INSERT INTO prices VALUES (?, ?, ?, ?)", (price_stamp.get_item_id(), price_stamp.get_price(), price_stamp.get_lowest_bargain_price(), price_stamp.get_timestamp()))
+
+    def insert_position(self, position: Position):
+        """Insert a position into the database."""
+        self.cursor.execute("INSERT INTO positions VALUES (?, ?)", (position.get_item_id(), position.get_position_size()))
+    
+    def insert_purchase_price(self, purchase_price: PurchasePrice):
+        """Insert a purchase price into the database."""
+        self.cursor.execute("INSERT INTO purchase_price VALUES (?, ?)", (purchase_price.get_item_id(), purchase_price.get_purchase_price()))
 
     def commit(self):
+        """Commit the changes to the database."""
         self.connection.commit()
 
-    def getItem(self, itemId):
-        self.cursor.execute("SELECT itemId, name FROM items WHERE itemId = ?", (itemId,))
-        dbItemId, dbName = self.cursor.fetchone()
-        return Item(dbItemId, dbName)
+    def get_item(self, item_id):
+        """Get an item from the database."""
+        self.cursor.execute("SELECT itemId, name FROM items WHERE itemId = ?", (item_id,))
+        db_item_id, db_name = self.cursor.fetchone()
+        return Item(db_item_id, db_name)
 
-    def getItems(self):
+    def get_items(self):
+        """Get all items from the database."""
         self.cursor.execute("SELECT itemId, name FROM items")
-        for dbItem in self.cursor.fetchall():
-            yield Item(dbItem[0], dbItem[1])
+        for db_item in self.cursor.fetchall():
+            yield Item(db_item[0], db_item[1])
 
-    def getPriceStamps(self, itemId):
-        self.cursor.execute("SELECT price, lowestBargainPrice, timestamp FROM prices WHERE itemId = ?", (itemId,))
-        for dbPriceStamp in self.cursor.fetchall():
-            yield PriceStamp(itemId, dbPriceStamp[0], dbPriceStamp[1], dbPriceStamp[2])
+    def get_price_stamps(self, item_id):
+        """Get all price stamps for an item from the database."""
+        self.cursor.execute("SELECT price, lowestBargainPrice, timestamp FROM prices WHERE itemId = ?", (item_id,))
+        for db_price_stamp in self.cursor.fetchall():
+            yield PriceStamp(item_id, db_price_stamp[0], db_price_stamp[1], db_price_stamp[2])
