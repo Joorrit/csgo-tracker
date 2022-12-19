@@ -27,4 +27,13 @@ class PriceStamp:
     def get_item_id(self):
         "returns the item id of the price stamp"
         return self.item_id
+    
+    def to_json(self):
+        "returns the price stamp as a json object"
+        return {
+            "item_id": self.item_id,
+            "price": self.price,
+            "highest_bargain_price": self.highest_bargain_price,
+            "timestamp": self.timestamp
+        }
         

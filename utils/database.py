@@ -64,3 +64,9 @@ class Database:
         self.cursor.execute("SELECT price, highest_bargain_price, timestamp FROM price WHERE item_id = %s", (item_id,))
         for db_price_stamp in self.cursor.fetchall():
             yield PriceStamp(item_id, db_price_stamp[0], db_price_stamp[1], db_price_stamp[2])
+    
+    def get_latest_price_stamp(self, item_id):
+        """Get the latest price stamp for an item from the database."""
+        self.cursor.execute("SELECT price, highest_bargain_price, timestamp FROM price WHERE item_id = %s ORDER BY timestamp DESC LIMIT 1", (item_id,))
+        db_price_stamp = self.cursor.fetchone()
+        return PriceStamp(item_id, db_price_stamp[0], db_price_stamp[1], db_price_stamp[2])
