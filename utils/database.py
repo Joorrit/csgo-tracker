@@ -116,14 +116,7 @@ class Database:
         """Get the first timestamp from the database."""
         self.cursor.execute("SELECT timestamp FROM price ORDER BY timestamp ASC LIMIT 1")
         return self.cursor.fetchone()[0]
-    
-    # Für was?
-    def get_position_value_histories(self):
-        """Get the position value history for all items."""
-        self.cursor.execute("SELECT * FROM position_value_history")
-        for db_position_value in self.cursor.fetchall():
-            yield PositionValue(db_position_value[0], db_position_value[1], db_position_value[2])
-    
+     
     def get_invested_capital_for_timestamp(self, timestamp):
         """Get the invested capital from the database."""
         self.cursor.execute("SELECT ( SELECT COALESCE(SUM(transfer_amount), 0) FROM fund_transfer tf1 WHERE tf1.transfer_type = 'deposit' AND timestamp <= %s ) - ( SELECT COALESCE(SUM(transfer_amount), 0) FROM fund_transfer tf2 WHERE tf2.transfer_type = 'withdraw' AND timestamp <= %s ) AS invested_capital FROM fund_transfer", (timestamp,timestamp))
