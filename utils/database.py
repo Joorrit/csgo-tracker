@@ -25,7 +25,7 @@ class Database:
 
     def insert_position_value(self, position_value: PositionValue):
         """Insert a position value into the database."""
-        self.cursor.execute("INSERT INTO position_value_history VALUES (%s, %s, %s)", (position_value.get_item_id(), position_value.get_position_value(), position_value.get_timestamp()))
+        self.cursor.execute("INSERT IGNORE INTO position_value_history VALUES (%s, %s, %s)", (position_value.get_item_id(), position_value.get_position_value(), position_value.get_timestamp()))
 
     def insert_order(self, order: Order):
         """Insert an order into the database."""
@@ -106,3 +106,9 @@ class Database:
         """Get the first timestamp from the database."""
         self.cursor.execute("SELECT timestamp FROM price ORDER BY timestamp ASC LIMIT 1")
         return self.cursor.fetchone()[0]
+    
+    def get_position_value_histories(self):
+        """Get the position value history for all items."""
+        self.cursor.execute("SELECT * FROM position_value_history")
+        for db_position_value in self.cursor.fetchall():
+            yield PositionValue(db_position_value[0], db_position_value[1], db_position_value[2])

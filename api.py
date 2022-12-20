@@ -56,6 +56,12 @@ def get_item_position_value_history(item_id):
     position_value_history = db.get_position_value_history(item_id)
     return {"data": list(map(lambda position_value: position_value.to_json(), position_value_history))}
 
+@app.route("/items/position_value_histories")
+def get_position_value_histories():
+    """returns the position value histories of all items in the database in json format"""
+    position_value_histories = db.get_position_value_histories()
+    return {"data": list(map(lambda position_value_history: position_value_history.to_json(), position_value_histories))}
+
 if __name__ == "__main__":
     app.run()
     # if sys.flags.dev_mode:
