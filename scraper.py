@@ -4,6 +4,8 @@ from utils.database import Database
 #from api.settings import MAX_API_TRIES
 from utils.exeptions.api_exeption import MaxRetries
 from utils.item import Item
+from utils.price_stamp import PriceStamp
+from utils.utils import get_timestamp
 
 db = Database()
 
@@ -16,7 +18,10 @@ def get_all_sell_price_stamps():
         try:
             price_stamp = item.get_sell_price_stamp()
         except MaxRetries:
-            continue
+            # untill database allows null values
+            price_stamp = PriceStamp(item.get_item_id(), 0, 0, get_timestamp())
+            #continue
+        print(price_stamp)
         db.insert_price_stamp(price_stamp)
     db.commit()
 
