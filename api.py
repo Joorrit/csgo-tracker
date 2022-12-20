@@ -1,11 +1,13 @@
 """This is the main entry point for the API."""
 
-import sys
+# import sys
 from flask import Flask
+from flask_cors import CORS
 from utils.database import Database
 
 db = Database()
 app = Flask(__name__)
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route("/items")
 def get_items():
