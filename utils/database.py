@@ -93,13 +93,6 @@ class Database:
         position_value = round(self.get_position_size(item_id).get_position_size() * latest_price_stamp.get_price(),2)
         return PositionValue(item_id, position_value, latest_price_stamp.get_timestamp())
 
-    # Für was?
-    def get_position_value_history(self, item_id):
-        """Get the position value history for an item from the database."""
-        self.cursor.execute("SELECT position_value, timestamp FROM position_value_history WHERE item_id = %s", (item_id,))
-        for db_position_value in self.cursor.fetchall():
-            yield PositionValue(item_id, db_position_value[0], db_position_value[1])
-
     def get_item_values_for_timestamp(self, date):
         """Get the item values for a specific date from the database."""
         self.cursor.execute("SELECT item_id, price, highest_bargain_price, TIMESTAMP FROM price p1 WHERE TIMESTAMP =( SELECT p2.timestamp FROM price p2 WHERE p1.item_id = p2.item_id AND timestamp <= %s ORDER BY timestamp DESC LIMIT 1 )", (date,))
