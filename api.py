@@ -62,6 +62,12 @@ def get_position_value_histories():
     position_value_histories = db.get_position_value_histories()
     return {"data": list(map(lambda position_value_history: position_value_history.to_json(), position_value_histories))}
 
+@app.route("/inventory/inventory_value_history")
+def get_inventory_value_history():
+    """returns the inventory value history in json format"""
+    inventory_value_history = db.get_inventory_value_history()
+    return {"data": list(map(lambda inventory_value: inventory_value.to_json(), inventory_value_history))}
+
 if __name__ == "__main__":
     app.run()
     # if sys.flags.dev_mode:

@@ -5,6 +5,7 @@ from utils.database import Database
 from utils.exeptions.api_exeption import MaxRetries
 from utils.item import Item
 from utils.order import Order
+from utils.inventory_value import InventoryValue
 from utils.item_ids import item_ids
 from datetime import datetime
 
@@ -48,7 +49,7 @@ def insert_order(order: Order):
     db.insert_order(order)
     db.commit()
 
-def get_inventar_value(timestamp):
+def get_inventory_value_for_timestamp(timestamp):
     """Get the inventar value for a specific timestamp."""
     # get the item values for a specific date
     price_map = {}
@@ -57,21 +58,25 @@ def get_inventar_value(timestamp):
 
     # get the current inventory for a specific date
     total_value = 0
+    invested_capital = db.get_invested_capital_for_timestamp(timestamp)
     for position_size in db.get_position_size_for_timestamp(timestamp):
         curr_item_id = position_size.get_item_id()
         total_value += position_size.get_position_size() * (price_map[curr_item_id].get_price() if(curr_item_id in price_map) else 0)
-    return total_value
+        #print(curr_item_id, total_value)
+    total_value = round(total_value, 2)
+    db.insert_inventory_value(InventoryValue(timestamp, total_value, invested_capital))
+    db.commit()
+    return InventoryValue(timestamp, total_value, invested_capital)
 
-def get_inventar_history_values(start_datetime, end_datetime):
+def get_inventory_history_values(start_datetime, end_datetime):
     """Get the inventar value for a specific timestamp."""
     first_timestamp = datetime.timestamp(start_datetime)
     last_timestamp = datetime.timestamp(end_datetime)
     for timestamp in range(int(first_timestamp), int(last_timestamp), 3600):
         date = datetime.fromtimestamp(timestamp)
-        val = get_inventar_value(date)
-        print(timestamp, round(val,2))
+        print(get_inventory_value_for_timestamp(date))
 
 if __name__ == "__main__":
     startTime = time.time()
-    get_inventar_history_values(db.get_first_timestamp(), datetime.now())
+    get_inventory_history_values(db.get_first_timestamp(), datetime.now())
     print(time.time() - startTime)

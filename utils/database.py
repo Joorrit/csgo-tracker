@@ -8,6 +8,7 @@ from utils.price_stamp import PriceStamp
 from utils.order import Order
 from utils.position_size import PositionSize
 from utils.position_value import PositionValue
+from utils.inventory_value import InventoryValue
 
 class Database:
     "Database class to store items, prices and positions"
@@ -22,6 +23,14 @@ class Database:
         )
         self.connection = mydb
         self.cursor = mydb.cursor()
+
+    def insert_inventory_value(self, inventory_value: InventoryValue):
+        """Insert an inventory value into the database."""
+        self.cursor.execute("INSERT INTO inventory_value VALUES (%s, %s, %s)", (inventory_value.get_timestamp(), inventory_value.get_inventory_value(), inventory_value.get_invested_capital(), ))
+
+    def insert_fund_transfer(self, amount, timestamp, transfer_type):
+        """Insert a fund transfer into the database."""
+        self.cursor.execute("INSERT INTO fund_transfer(`transfer_amount`, `timestamp`, `transfer_type`) VALUES (%s, %s, %s)", (amount, timestamp, transfer_type))
 
     def insert_position_value(self, position_value: PositionValue):
         """Insert a position value into the database."""
@@ -98,7 +107,7 @@ class Database:
 
     def get_position_size_for_timestamp(self, date):
         """Get the position size for a specific date from the database."""
-        self.cursor.execute("SELECT item_id, ( SELECT COALESCE(SUM(quantity), 0) FROM `order` o1 WHERE o1.item_id = od.item_id AND order_type = 'buy' AND timestamp <= %s ) -( SELECT COALESCE(SUM(quantity), 0) FROM `order` o2 WHERE o2.item_id = od.item_id AND order_type = 'sell' AND timestamp <= %s ) AS difference FROM `order` od GROUP BY item_id", (date,date))
+        self.cursor.execute("SELECT item_id, ( SELECT COALESCE(SUM(quantity), 0) FROM `order` o1 WHERE o1.item_id = od.item_id AND order_type = 'buy' AND timestamp <= %s ) -( SELECT COALESCE(SUM(quantity), 0) FROM `order` o2 WHERE o2.item_id = od.item_id AND order_type = 'sell' AND timestamp <= %s ) AS position_size FROM `order` od GROUP BY item_id", (date,date))
         for db_position_size in self.cursor.fetchall():
             yield PositionSize(db_position_size[0], int(db_position_size[1]))
 
@@ -112,3 +121,20 @@ class Database:
         self.cursor.execute("SELECT * FROM position_value_history")
         for db_position_value in self.cursor.fetchall():
             yield PositionValue(db_position_value[0], db_position_value[1], db_position_value[2])
+    
+    def get_invested_capital_for_timestamp(self, timestamp):
+        """Get the invested capital from the database."""
+        self.cursor.execute("SELECT ( SELECT COALESCE(SUM(transfer_amount), 0) FROM fund_transfer tf1 WHERE tf1.transfer_type = 'deposit' AND timestamp <= %s ) - ( SELECT COALESCE(SUM(transfer_amount), 0) FROM fund_transfer tf2 WHERE tf2.transfer_type = 'withdraw' AND timestamp <= %s ) AS invested_capital FROM fund_transfer", (timestamp,timestamp))
+        return round(self.cursor.fetchone()[0],2)
+
+    def get_inventory_value(self, timestamp):
+        """Get the current inventory value from the database."""
+        self.cursor.execute("SELECT from inventory_value", (timestamp,))
+        return round(self.cursor.fetchone()[0],2)
+
+    def get_inventory_value_history(self):
+        """Get the inventory value history from the database."""
+        self.cursor.execute("SELECT * FROM inventory_value")
+        for db_inventory_value in self.cursor.fetchall():
+            yield InventoryValue(db_inventory_value[0], db_inventory_value[1])
+

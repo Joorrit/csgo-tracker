@@ -4,8 +4,8 @@ from utils.database import Database
 #from api.settings import MAX_API_TRIES
 from utils.exeptions.api_exeption import MaxRetries
 from utils.item import Item
-from utils.price_stamp import PriceStamp
-from utils.utils import get_timestamp
+from utils.inventory_value import InventoryValue
+import datetime
 
 db = Database()
 
@@ -18,24 +18,21 @@ def get_all_sell_price_stamps():
         try:
             price_stamp = item.get_sell_price_stamp()
         except MaxRetries:
-            # untill database allows null values
-            price_stamp = PriceStamp(item.get_item_id(), 0, 0, get_timestamp())
-            #continue
+            continue
         print(price_stamp)
         db.insert_price_stamp(price_stamp)
     db.commit()
 
-def get_all_position_values():
-    """Updates the position value of all items in the database and saves item_id,
-    position value and the timestamp."""
-    items = db.get_items()
-    for item in items:
-        position_value = db.get_position_value(item.get_item_id())
-        db.insert_position_value(position_value)
-        print(position_value)
+def get_inventory_value():
+    """calculates the latest inventory value."""
+    timestamp=datetime.datetime.now()
+    inventory_value = sum(db.get_position_value(item.get_item_id()).get_position_value() for item in db.get_items())
+    invested_capital = db.get_invested_capital_for_timestamp(timestamp)
+    db.insert_inventory_value(InventoryValue(timestamp, inventory_value, invested_capital))
     db.commit()
+
 
 if __name__ == "__main__":
     get_all_sell_price_stamps()
-    get_all_position_values()
+    get_inventory_value()
     
