@@ -32,7 +32,7 @@ def get_item_price(item_id):
     price_stamp = db.get_latest_price_stamp(item_id)
     return price_stamp.to_json()
 
-@app.route("/items/<item_id>/order_history")        
+@app.route("/items/<item_id>/order_history")
 def get_item_order_history(item_id):
     """returns the order history of the item with the given id in json format"""
     order_stamps = db.get_order_stamps(item_id)
@@ -50,12 +50,14 @@ def get_item_position_value(item_id):
     position_value = db.get_position_value(item_id)
     return position_value.to_json()
 
+# Für was?
 @app.route("/items/<item_id>/position_value_history")
 def get_item_position_value_history(item_id):
     """returns the position value history of the item with the given id in json format"""
     position_value_history = db.get_position_value_history(item_id)
     return {"data": list(map(lambda position_value: position_value.to_json(), position_value_history))}
 
+# Für was?
 @app.route("/items/position_value_histories")
 def get_position_value_histories():
     """returns the position value histories of all items in the database in json format"""
