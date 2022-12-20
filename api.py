@@ -1,9 +1,10 @@
 """This is the main entry point for the API."""
 
 # import sys
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 from utils.database import Database
+from utils.utils import get_timestamp
 
 db = Database()
 app = Flask(__name__)
@@ -57,6 +58,13 @@ def get_inventory_value_history():
     """returns the inventory value history in json format"""
     inventory_value_history = db.get_inventory_value_history()
     return {"data": list(map(lambda inventory_value: inventory_value.to_json(), inventory_value_history))}
+
+@app.route("/deposit", methods=["POST"])
+def add_fund():
+    if request.method == 'POST':
+        transfer_amount = request.form.get('transfer_amount')
+        db.insert_fund_transfer(transfer_amount, get_timestamp(), "deposit")
+        return "success"
 
 if __name__ == "__main__":
     app.run()
