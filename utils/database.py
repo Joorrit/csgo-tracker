@@ -42,7 +42,7 @@ class Database:
 
     def insert_item(self, item: Item):
         """Insert an item into the database. If the item already exists, it will be ignored."""
-        self.cursor.execute("INSERT IGNORE INTO item VALUES (%s, %s)", (item.get_item_id(), item.get_name()))
+        self.cursor.execute("REPLACE INTO item VALUES (%s, %s, %s)", (item.get_item_id(), item.get_name(), item.get_icon_url()))
 
     def insert_price_stamp(self, price_stamp: PriceStamp):
         """Insert a price stamp into the database."""
@@ -54,15 +54,16 @@ class Database:
 
     def get_item(self, item_id):
         """Get an item from the database."""
-        self.cursor.execute("SELECT item_id, name FROM item WHERE item_id = %s", (item_id,))
-        db_item_id, db_name = self.cursor.fetchone()
-        return Item(db_item_id, db_name)
+        self.cursor.execute("SELECT item_id, name, icon_url FROM item WHERE item_id = %s", (item_id,))
+        db_item_id, db_name, db_icon_url = self.cursor.fetchone()
+        return Item(db_item_id, db_name, db_icon_url)
 
     def get_items(self):
         """Get all items from the database."""
         self.cursor.execute("SELECT item_id, name FROM item")
         for db_item in self.cursor.fetchall():
-            yield Item(db_item[0], db_item[1])
+            db_item_id, db_name, db_icon_url = db_item
+            yield Item(db_item_id, db_name, db_icon_url)
 
     def get_price_stamps(self, item_id):
         """Get all price stamps for an item from the database."""
@@ -92,13 +93,6 @@ class Database:
         latest_price_stamp = self.get_latest_price_stamp(item_id)
         position_value = round(self.get_position_size(item_id).get_position_size() * latest_price_stamp.get_price(),2)
         return PositionValue(item_id, position_value, latest_price_stamp.get_timestamp())
-
-    # Für was?
-    def get_position_value_history(self, item_id):
-        """Get the position value history for an item from the database."""
-        self.cursor.execute("SELECT position_value, timestamp FROM position_value_history WHERE item_id = %s", (item_id,))
-        for db_position_value in self.cursor.fetchall():
-            yield PositionValue(item_id, db_position_value[0], db_position_value[1])
 
     def get_item_values_for_timestamp(self, date):
         """Get the item values for a specific date from the database."""

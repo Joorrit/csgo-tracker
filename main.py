@@ -1,13 +1,12 @@
 """Main file for the Fund Tracker"""
 
-import time
+from datetime import datetime
 from utils.database import Database
 from utils.exeptions.api_exeption import MaxRetries
 from utils.item import Item
 from utils.order import Order
 from utils.inventory_value import InventoryValue
 from utils.item_ids import item_ids
-from datetime import datetime
 
 db = Database()
 
@@ -77,6 +76,7 @@ def get_inventory_history_values(start_datetime, end_datetime):
         print(get_inventory_value_for_timestamp(date))
 
 if __name__ == "__main__":
-    startTime = time.time()
-    get_inventory_history_values(db.get_first_timestamp(), datetime.now())
-    print(time.time() - startTime)
+    get_initial_items()
+    # startTime = time.time()
+    # get_inventory_history_values(db.get_first_timestamp(), datetime.now())
+    # print(time.time() - startTime)

@@ -12,10 +12,12 @@ class Item:
     """Class for an item with an item_id and a name"""
     itemId = None
     name = None
+    icon_url = None
 
-    def __init__(self, item_id, name = ""):
+    def __init__(self, item_id, name=None, icon_url=None):
         self.item_id = item_id
         self.name = name
+        self.icon_url = icon_url
 
     def __str__(self):
         return f"Item: {self.name} ({self.item_id})"
@@ -27,6 +29,10 @@ class Item:
     def get_name(self):
         """Returns the name of the item"""
         return self.name
+
+    def get_icon_url(self):
+        """Returns the icon url of the item"""
+        return self.icon_url
 
     def get_buff_sell_order_api_link(self):
         """Returns the buff.163.com sell order api link"""
@@ -64,6 +70,7 @@ class Item:
                     break
                 data = response.json()
                 self.name = data["data"]["goods_infos"][str(self.item_id)]["name"]
+                self.icon_url = data["data"]["items"][0]["img_src"]
                 return
             except requests.JSONDecodeError:
                 print(status_code)
@@ -93,5 +100,6 @@ class Item:
         """Returns a json representation of the item"""
         return {
             "item_id": self.item_id,
-            "name": self.name
+            "name": self.name,
+            "icon_url": self.icon_url
         }
