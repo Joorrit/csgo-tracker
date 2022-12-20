@@ -31,6 +31,6 @@ def get_all_position_values():
     db.commit()
 
 if __name__ == "__main__":
-    #get_all_sell_price_stamps()
+    get_all_sell_price_stamps()
     get_all_position_values()
     
