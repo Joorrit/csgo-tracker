@@ -5,9 +5,9 @@ from secret import MYSQL_DATABASE, MYSQL_HOST, MYSQL_PASSWORD, MYSQL_USER
 
 from utils.item import Item
 from utils.price_stamp import PriceStamp
-from utils.position_size import PositionSize
-from utils.purchase_price import PurchasePrice
 from utils.order import Order
+from utils.position_size import PositionSize
+from utils.position_value import PositionValue
 
 class Database:
     "Database class to store items, prices and positions"
@@ -23,6 +23,10 @@ class Database:
         self.connection = mydb
         self.cursor = mydb.cursor()
 
+    def insert_position_value(self, position_value: PositionValue):
+        """Insert a position value into the database."""
+        self.cursor.execute("INSERT INTO position_value_history VALUES (%s, %s, %s)", (position_value.get_item_id(), position_value.get_position_value(), position_value.get_timestamp()))
+
     def insert_order(self, order: Order):
         """Insert an order into the database."""
         self.cursor.execute("INSERT INTO `order`(`item_id`, `quantity`, `price`, `timestamp`, `order_type`) VALUES (%s, %s, %s, %s, %s)", (order.get_item_id(), order.get_quantity(), order.get_purchase_price(), order.get_timestamp(), order.get_order_type()))
@@ -34,14 +38,6 @@ class Database:
     def insert_price_stamp(self, price_stamp: PriceStamp):
         """Insert a price stamp into the database."""
         self.cursor.execute("INSERT INTO price VALUES (%s, %s, %s, %s)", (price_stamp.get_item_id(), price_stamp.get_price(), price_stamp.get_highest_bargain_price(), price_stamp.get_timestamp()))
-
-    def insert_position_size(self, position_size: PositionSize):
-        """Insert a position into the database."""
-        self.cursor.execute("INSERT IGNORE INTO position_size VALUES (%s, %s)", (position_size.get_item_id(), position_size.get_position_size()))
-
-    def insert_purchase_price(self, purchase_price: PurchasePrice):
-        """Insert a purchase price into the database."""
-        self.cursor.execute("INSERT IGNORE INTO purchase_price VALUES (%s, %s)", (purchase_price.get_item_id(), purchase_price.get_purchase_price()))
 
     def commit(self):
         """Commit the changes to the database."""
@@ -76,3 +72,20 @@ class Database:
         self.cursor.execute("SELECT quantity, price, timestamp, order_type FROM `order` WHERE item_id = %s", (item_id,))
         for db_order in self.cursor.fetchall():
             yield Order(item_id, db_order[0], db_order[1], db_order[2], db_order[3])
+
+    def get_position_size(self, item_id):
+        """Get the position size for an item from the database."""
+        self.cursor.execute("""SELECT (SELECT COALESCE(SUM(quantity),0) FROM `order` WHERE item_id = %s AND order_type = 'buy') - (SELECT COALESCE(SUM(quantity),0) FROM `order` WHERE item_id = %s AND order_type = 'sell')""", (item_id, item_id))
+        return PositionSize(item_id, int(self.cursor.fetchone()[0]))
+    
+    def get_position_value(self, item_id):
+        """Get the position value for an item from the database."""
+        latest_price_stamp = self.get_latest_price_stamp(item_id)
+        position_value = round(self.get_position_size(item_id).get_position_size() * latest_price_stamp.get_price(),2)
+        return PositionValue(item_id, position_value, latest_price_stamp.get_timestamp())
+
+    def get_position_value_history(self, item_id):
+        """Get the position value history for an item from the database."""
+        self.cursor.execute("SELECT position_value, timestamp FROM position_value_history WHERE item_id = %s", (item_id,))
+        for db_position_value in self.cursor.fetchall():
+            yield PositionValue(item_id, db_position_value[0], db_position_value[1])

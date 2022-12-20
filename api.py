@@ -38,6 +38,24 @@ def get_item_order_history(item_id):
     order_stamps = db.get_order_stamps(item_id)
     return {"data": list(map(lambda order_stamp: order_stamp.to_json(), order_stamps))}
 
+@app.route("/items/<item_id>/position_size")
+def get_item_position_size(item_id):
+    """returns the position size of the item with the given id in json format"""
+    position_size = db.get_position_size(item_id)
+    return position_size.to_json()
+
+@app.route("/items/<item_id>/position_value")
+def get_item_position_value(item_id):
+    """returns the position value of the item with the given id in json format"""
+    position_value = db.get_position_value(item_id)
+    return position_value.to_json()
+
+@app.route("/items/<item_id>/position_value_history")
+def get_item_position_value_history(item_id):
+    """returns the position value history of the item with the given id in json format"""
+    position_value_history = db.get_position_value_history(item_id)
+    return {"data": list(map(lambda position_value: position_value.to_json(), position_value_history))}
+
 if __name__ == "__main__":
     app.run()
     # if sys.flags.dev_mode:

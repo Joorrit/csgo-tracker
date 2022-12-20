@@ -20,6 +20,17 @@ def get_all_sell_price_stamps():
         db.insert_price_stamp(price_stamp)
     db.commit()
 
+def get_all_position_values():
+    """Updates the position value of all items in the database and saves item_id,
+    position value and the timestamp."""
+    items = db.get_items()
+    for item in items:
+        position_value = db.get_position_value(item.get_item_id())
+        db.insert_position_value(position_value)
+        print(position_value)
+    db.commit()
+
 if __name__ == "__main__":
     get_all_sell_price_stamps()
+    get_all_position_values()
     

@@ -4,8 +4,6 @@ import pandas as pd
 from utils.database import Database
 from utils.exeptions.api_exeption import MaxRetries
 from utils.item import Item
-from utils.position_size import PositionSize
-from utils.purchase_price import PurchasePrice
 from utils.order import Order
 from utils.item_ids import item_ids
 from utils.utils import get_timestamp
@@ -45,16 +43,6 @@ def get_sell_price_history(item_id):
     for price_stamp in db.get_price_stamps(item_id):
         print(price_stamp)
 
-def insert_position_size(position: PositionSize):
-    """Insert a position into the database."""
-    db.insert_position_size(position)
-    db.commit()
-
-def insert_purchase_price(purchase_price: PurchasePrice):
-    """Insert a purchase price into the database."""
-    db.insert_purchase_price(purchase_price)
-    db.commit()
-
 def insert_order(order: Order):
     """Insert an order into the database."""
     db.insert_order(order)
@@ -63,9 +51,9 @@ def insert_order(order: Order):
 if __name__ == "__main__":
     # init database
     #get_initial_items()
-    df = pd.read_csv("buy_order_history.csv", index_col=0)
-    for index, row in df.iterrows():
-        insert_order(Order(int(row["Item_IDs"]), int(row["Quantities"]), row["Prices"], get_timestamp(), "buy"))
+    # df = pd.read_csv("buy_order_history.csv", index_col=0)
+    # for index, row in df.iterrows():
+    #     insert_order(Order(int(row["Item_IDs"]), int(row["Quantities"]), row["Prices"], get_timestamp(), "buy"))
 
     #get_all_sell_price_stamps()
     #get_sell_price_history(next(db.getItems()).itemId)
