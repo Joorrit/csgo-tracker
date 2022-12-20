@@ -89,3 +89,20 @@ class Database:
         self.cursor.execute("SELECT position_value, timestamp FROM position_value_history WHERE item_id = %s", (item_id,))
         for db_position_value in self.cursor.fetchall():
             yield PositionValue(item_id, db_position_value[0], db_position_value[1])
+
+    def get_item_values_for_timestamp(self, date):
+        """Get the item values for a specific date from the database."""
+        self.cursor.execute("SELECT item_id, price, highest_bargain_price, TIMESTAMP FROM price p1 WHERE TIMESTAMP =( SELECT p2.timestamp FROM price p2 WHERE p1.item_id = p2.item_id AND timestamp <= %s ORDER BY timestamp DESC LIMIT 1 )", (date,))
+        for db_item_value in self.cursor.fetchall():
+            yield PriceStamp(db_item_value[0], db_item_value[1], db_item_value[2], db_item_value[3])
+
+    def get_position_size_for_timestamp(self, date):
+        """Get the position size for a specific date from the database."""
+        self.cursor.execute("SELECT item_id, ( SELECT COALESCE(SUM(quantity), 0) FROM `order` o1 WHERE o1.item_id = od.item_id AND order_type = 'buy' AND timestamp <= %s ) -( SELECT COALESCE(SUM(quantity), 0) FROM `order` o2 WHERE o2.item_id = od.item_id AND order_type = 'sell' AND timestamp <= %s ) AS difference FROM `order` od GROUP BY item_id", (date,date))
+        for db_position_size in self.cursor.fetchall():
+            yield PositionSize(db_position_size[0], int(db_position_size[1]))
+
+    def get_first_timestamp(self):
+        """Get the first timestamp from the database."""
+        self.cursor.execute("SELECT timestamp FROM price ORDER BY timestamp ASC LIMIT 1")
+        return self.cursor.fetchone()[0]

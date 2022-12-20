@@ -1,12 +1,12 @@
 """Main file for the Fund Tracker"""
 
-import pandas as pd
+import time
 from utils.database import Database
 from utils.exeptions.api_exeption import MaxRetries
 from utils.item import Item
 from utils.order import Order
 from utils.item_ids import item_ids
-from utils.utils import get_timestamp
+from datetime import datetime
 
 db = Database()
 
@@ -48,13 +48,30 @@ def insert_order(order: Order):
     db.insert_order(order)
     db.commit()
 
-if __name__ == "__main__":
-    # init database
-    #get_initial_items()
-    # df = pd.read_csv("buy_order_history.csv", index_col=0)
-    # for index, row in df.iterrows():
-    #     insert_order(Order(int(row["Item_IDs"]), int(row["Quantities"]), row["Prices"], get_timestamp(), "buy"))
+def get_inventar_value(timestamp):
+    """Get the inventar value for a specific timestamp."""
+    # get the item values for a specific date
+    price_map = {}
+    for position_value in db.get_item_values_for_timestamp(timestamp):
+        price_map[position_value.item_id] = position_value
 
-    #get_all_sell_price_stamps()
-    #get_sell_price_history(next(db.getItems()).itemId)
-    pass
+    # get the current inventory for a specific date
+    total_value = 0
+    for position_size in db.get_position_size_for_timestamp(timestamp):
+        curr_item_id = position_size.get_item_id()
+        total_value += position_size.get_position_size() * (price_map[curr_item_id].get_price() if(curr_item_id in price_map) else 0)
+    return total_value
+
+def get_inventar_history_values(start_datetime, end_datetime):
+    """Get the inventar value for a specific timestamp."""
+    first_timestamp = datetime.timestamp(start_datetime)
+    last_timestamp = datetime.timestamp(end_datetime)
+    for timestamp in range(int(first_timestamp), int(last_timestamp), 3600):
+        date = datetime.fromtimestamp(timestamp)
+        val = get_inventar_value(date)
+        print(timestamp, round(val,2))
+
+if __name__ == "__main__":
+    startTime = time.time()
+    get_inventar_history_values(db.get_first_timestamp(), datetime.now())
+    print(time.time() - startTime)
