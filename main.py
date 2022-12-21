@@ -22,7 +22,6 @@ def get_initial_items():
         db.insert_item(item)
     db.commit()
 
-
 def get_all_sell_price_stamps():
     """Updates the value of all items in the database and saves item_id, sell price,
     bargain price and the timestamp."""
@@ -74,6 +73,12 @@ def get_inventory_history_values(start_datetime, end_datetime):
     for timestamp in range(int(first_timestamp), int(last_timestamp), 3600):
         date = datetime.fromtimestamp(timestamp)
         print(get_inventory_value_for_timestamp(date))
+
+def add_order_in_retrospect(item_id, order_size, order_price, order_timestamp, order_type):
+    """Add an order in retrospect and recalculate the inventory history values."""
+    order = Order(item_id, order_size, order_price, order_timestamp, order_type)
+    db.insert_order(order)
+    get_inventory_history_values(db.get_first_timestamp(), datetime.now())
 
 if __name__ == "__main__":
     get_initial_items()

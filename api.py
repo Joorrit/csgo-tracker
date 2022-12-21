@@ -1,10 +1,13 @@
 """This is the main entry point for the API."""
 
 # import sys
+import datetime
+import dateutil.parser
 from flask import Flask, request
 from flask_cors import CORS
 from utils.database import Database
 from utils.utils import get_timestamp
+from utils.order import Order
 
 db = Database()
 app = Flask(__name__)
@@ -61,10 +64,45 @@ def get_inventory_value_history():
 
 @app.route("/deposit", methods=["POST"])
 def add_fund():
+    """adds an entry with the given amount to the fund transfer table as a deposit"""
     if request.method == 'POST':
         transfer_amount = request.form.get('transfer_amount')
         db.insert_fund_transfer(transfer_amount, get_timestamp(), "deposit")
+        db.commit()
         return "success"
+    return "failure"
+
+@app.route("/withdraw", methods=["POST"])
+def withdraw_fund():
+    """adds an entry with the given amount to the fund transfer table as a withdraw"""
+    if request.method == 'POST':
+        transfer_amount = request.form.get('transfer_amount')
+        db.insert_fund_transfer(transfer_amount, get_timestamp(), "withdraw")
+        db.commit()
+        return "success"
+    return "failure"
+
+@app.route("/buy_order", methods=["POST"])
+def buy_item():
+    """adds an order to the order table as a buy order"""
+    if request.method == 'POST':
+        item_id = request.form.get('item_id')
+        quantity = request.form.get('quantity')
+        price = request.form.get('price')
+        timestamp = dateutil.parser.parse(request.form.get('timestamp'))
+
+        datediff = datetime.datetime.now()-timestamp
+        #TODO: check if items exists in the database, if not, add it
+        if datediff.days == 0 and datediff.hours == 0:
+            db.insert_order(Order(item_id, quantity, price, timestamp, "buy"))
+            db.commit()
+            return "success"
+        else:
+            db.insert_order(Order(item_id, quantity, price, timestamp, "buy"))
+            #TODO: update inventory value table
+            db.commit()
+            return "success"
+    return "failure"
 
 if __name__ == "__main__":
     app.run()
