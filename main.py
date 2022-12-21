@@ -63,16 +63,17 @@ def get_inventory_value_for_timestamp(timestamp):
         #print(curr_item_id, total_value)
     total_value = round(total_value, 2)
     db.insert_inventory_value(InventoryValue(timestamp, total_value, invested_capital))
-    db.commit()
     return InventoryValue(timestamp, total_value, invested_capital)
 
 def get_inventory_history_values(start_datetime, end_datetime):
     """Get the inventar value for a specific timestamp."""
     first_timestamp = datetime.timestamp(start_datetime)
+    first_timestamp = first_timestamp + (3600 - first_timestamp % 3600)
     last_timestamp = datetime.timestamp(end_datetime)
     for timestamp in range(int(first_timestamp), int(last_timestamp), 3600):
         date = datetime.fromtimestamp(timestamp)
         print(get_inventory_value_for_timestamp(date))
+    db.commit()
 
 def add_order_in_retrospect(item_id, order_size, order_price, order_timestamp, order_type):
     """Add an order in retrospect and recalculate the inventory history values."""
@@ -81,7 +82,7 @@ def add_order_in_retrospect(item_id, order_size, order_price, order_timestamp, o
     get_inventory_history_values(db.get_first_timestamp(), datetime.now())
 
 if __name__ == "__main__":
-    get_initial_items()
+    # get_initial_items()
     # startTime = time.time()
-    # get_inventory_history_values(db.get_first_timestamp(), datetime.now())
+    get_inventory_history_values(db.get_first_timestamp(), datetime.now())
     # print(time.time() - startTime)

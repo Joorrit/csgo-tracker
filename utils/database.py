@@ -34,7 +34,7 @@ class Database:
 
     def insert_inventory_value(self, inventory_value: InventoryValue):
         """Insert an inventory value into the database."""
-        self.cursor.execute("INSERT INTO inventory_value VALUES (%s, %s, %s)", (inventory_value.get_timestamp(), inventory_value.get_inventory_value(), inventory_value.get_invested_capital(), ))
+        self.cursor.execute("REPLACE INTO inventory_value VALUES (%s, %s, %s)", (inventory_value.get_timestamp(), inventory_value.get_inventory_value(), inventory_value.get_invested_capital(), ))
 
     def insert_fund_transfer(self, amount, timestamp, transfer_type: "deposit" or "withdrawal"):
         """Insert a fund transfer into the database."""
