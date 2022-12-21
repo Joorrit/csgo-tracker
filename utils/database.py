@@ -24,6 +24,14 @@ class Database:
         self.connection = mydb
         self.cursor = mydb.cursor()
 
+    def get_cursor(self):
+        """Returns the cursor of the database object."""
+        return self.cursor
+
+    def set_cursor(self, cursor):
+        """Sets the cursor of the database object."""
+        self.cursor = cursor
+
     def insert_inventory_value(self, inventory_value: InventoryValue):
         """Insert an inventory value into the database."""
         self.cursor.execute("INSERT INTO inventory_value VALUES (%s, %s, %s)", (inventory_value.get_timestamp(), inventory_value.get_inventory_value(), inventory_value.get_invested_capital(), ))
