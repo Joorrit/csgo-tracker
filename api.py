@@ -2,7 +2,7 @@
 
 # import sys
 import datetime
-import dateutil.parser
+#import dateutil.parser
 from flask import Flask, request
 from flask_cors import CORS
 from utils.database import Database
@@ -89,19 +89,20 @@ def buy_item():
         item_id = request.form.get('item_id')
         quantity = request.form.get('quantity')
         price = request.form.get('price')
-        timestamp = dateutil.parser.parse(request.form.get('timestamp'))
-
+        #timestamp = dateutil.parser.parse(request.form.get('timestamp'))
+        #provisorisch für keinen Fehler
+        timestamp = datetime.datetime.now()
         datediff = datetime.datetime.now()-timestamp
+        #datediff = datetime.datetime.now()-timestamp
         #TODO: check if items exists in the database, if not, add it
         if datediff.days == 0 and datediff.hours == 0:
             db.insert_order(Order(item_id, quantity, price, timestamp, "buy"))
             db.commit()
             return "success"
-        else:
-            db.insert_order(Order(item_id, quantity, price, timestamp, "buy"))
-            #TODO: update inventory value table
-            db.commit()
-            return "success"
+        db.insert_order(Order(item_id, quantity, price, timestamp, "buy"))
+        #TODO: update inventory value table
+        db.commit()
+        return "success"
     return "failure"
 
 if __name__ == "__main__":
