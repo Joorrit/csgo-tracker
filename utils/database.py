@@ -60,7 +60,7 @@ class Database:
 
     def get_items(self):
         """Get all items from the database."""
-        self.cursor.execute("SELECT item_id, name FROM item")
+        self.cursor.execute("SELECT item_id, name, icon_url FROM item")
         for db_item in self.cursor.fetchall():
             db_item_id, db_name, db_icon_url = db_item
             yield Item(db_item_id, db_name, db_icon_url)
