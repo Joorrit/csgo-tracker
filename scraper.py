@@ -1,11 +1,9 @@
 """Gets executed to scrape the API for all items and insert them into the database"""
 
-from utils.database import Database
-#from api.settings import MAX_API_TRIES
-from utils.exeptions.api_exeption import MaxRetries
-from utils.item import Item
-from utils.inventory_value import InventoryValue
 import datetime
+from utils.database import Database
+from utils.exeptions.api_exeption import MaxRetries
+from utils.inventory_value import InventoryValue
 
 db = Database()
 
@@ -30,6 +28,7 @@ def get_inventory_value():
     invested_capital = db.get_invested_capital_for_timestamp(timestamp)
     db.insert_inventory_value(InventoryValue(timestamp, inventory_value, invested_capital))
     db.commit()
+    db.disconnect()
 
 
 if __name__ == "__main__":

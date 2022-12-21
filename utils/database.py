@@ -52,6 +52,10 @@ class Database:
         """Commit the changes to the database."""
         self.connection.commit()
 
+    def disconnect(self):
+        """Close the database connection."""
+        self.connection.disconnect()
+
     def get_item(self, item_id):
         """Get an item from the database."""
         self.cursor.execute("SELECT item_id, name, icon_url FROM item WHERE item_id = %s", (item_id,))

@@ -9,66 +9,83 @@ from utils.database import Database
 from utils.utils import get_timestamp
 from utils.order import Order
 
-db = Database()
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route("/items")
 def get_items():
     """returns all items in the database in json format"""
+    db = Database()
     items = db.get_items()
+    db.disconnect()
     result = {"data": list(map(lambda item: item.to_json(), items))}
     return result
 
 @app.route("/items/<item_id>")
 def get_item(item_id):
     """returns the item with the given id in json format"""
+    db = Database()
     item = db.get_item(item_id)
+    db.disconnect()
     return item.to_json()
 
 @app.route("/items/<item_id>/price_history")
 def get_item_price_history(item_id):
     """returns the price history of the item with the given id in json format"""
+    db = Database()
     price_stamps = db.get_price_stamps(item_id)
+    db.disconnect()
     return {"data": list(map(lambda price_stamp: price_stamp.to_json(), price_stamps))}
 
 @app.route("/items/<item_id>/price")
 def get_item_price(item_id):
     """returns the latest price of the item with the given id in json format"""
+    db = Database()
     price_stamp = db.get_latest_price_stamp(item_id)
+    db.disconnect()
     return price_stamp.to_json()
 
 @app.route("/items/<item_id>/order_history")
 def get_item_order_history(item_id):
     """returns the order history of the item with the given id in json format"""
+    db = Database()
     order_stamps = db.get_order_stamps(item_id)
+    db.disconnect()
     return {"data": list(map(lambda order_stamp: order_stamp.to_json(), order_stamps))}
 
 @app.route("/items/<item_id>/position_size")
 def get_item_position_size(item_id):
     """returns the position size of the item with the given id in json format"""
+    db = Database()
     position_size = db.get_position_size(item_id)
+    db.disconnect()
     return position_size.to_json()
 
 @app.route("/items/<item_id>/position_value")
 def get_item_position_value(item_id):
     """returns the position value of the item with the given id in json format"""
+    db = Database()
     position_value = db.get_position_value(item_id)
+    db.disconnect()
     return position_value.to_json()
 
 @app.route("/inventory/inventory_value_history")
 def get_inventory_value_history():
     """returns the inventory value history in json format"""
+    db = Database()
     inventory_value_history = db.get_inventory_value_history()
+    db.disconnect()
     return {"data": list(map(lambda inventory_value: inventory_value.to_json(), inventory_value_history))}
 
 @app.route("/deposit", methods=["POST"])
 def add_fund():
     """adds an entry with the given amount to the fund transfer table as a deposit"""
     if request.method == 'POST':
+        db = Database()
         transfer_amount = request.form.get('transfer_amount')
         db.insert_fund_transfer(transfer_amount, get_timestamp(), "deposit")
         db.commit()
+        db.disconnect()
         return "success"
     return "failure"
 
@@ -76,9 +93,11 @@ def add_fund():
 def withdraw_fund():
     """adds an entry with the given amount to the fund transfer table as a withdraw"""
     if request.method == 'POST':
+        db = Database()
         transfer_amount = request.form.get('transfer_amount')
         db.insert_fund_transfer(transfer_amount, get_timestamp(), "withdraw")
         db.commit()
+        db.disconnect()
         return "success"
     return "failure"
 
@@ -86,6 +105,7 @@ def withdraw_fund():
 def buy_item():
     """adds an order to the order table as a buy order"""
     if request.method == 'POST':
+        db = Database()
         item_id = request.form.get('item_id')
         quantity = request.form.get('quantity')
         price = request.form.get('price')
@@ -102,6 +122,7 @@ def buy_item():
         db.insert_order(Order(item_id, quantity, price, timestamp, "buy"))
         #TODO: update inventory value table
         db.commit()
+        db.disconnect()
         return "success"
     return "failure"
 
