@@ -9,6 +9,7 @@ from utils.order import Order
 from utils.position_size import PositionSize
 from utils.position_value import PositionValue
 from utils.inventory_value import InventoryValue
+from utils.position_information import PositionInformation
 
 class Database:
     "Database class to store items, prices and positions"
@@ -138,3 +139,10 @@ class Database:
         self.cursor.execute("SELECT * FROM inventory_value")
         for db_inventory_value in self.cursor.fetchall():
             yield InventoryValue(db_inventory_value[0],db_inventory_value[1],db_inventory_value[2])
+
+    def get_positions_information(self):
+        """Get information to all positions from the database. Information consists of
+            item_id, name, icon_url, position_size, purchase_price, current_price, prev_day_price."""
+        self.cursor.execute("""SELECT i.item_id, name, icon_url, SUM(quantity) AS position_size, (SELECT SUM(quantity * price) / SUM(quantity) FROM `order` od WHERE quantity > 0 and o.item_id = od.item_id GROUP BY item_id ) AS purchase_price, ( SELECT price FROM price p1 WHERE p1.item_id = i.item_id ORDER BY TIMESTAMP DESC LIMIT 1 ) AS currentPrice,( SELECT price FROM price p1 WHERE p1.item_id = i.item_id AND p1.timestamp < NOW() - INTERVAL 1 DAY ORDER BY p1.timestamp DESC LIMIT 1) AS prev_day_price FROM item i, `order` o WHERE i.item_id = o.item_id GROUP BY i.item_id""")
+        for position_information in self.cursor.fetchall():
+            yield PositionInformation(Item(position_information[0],position_information[1],position_information[2]),int(position_information[3]),position_information[4],position_information[5],position_information[6])
