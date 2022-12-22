@@ -9,13 +9,11 @@ from utils.database import Database
 from utils.utils import get_timestamp
 from utils.order import Order
 
-db = Database()
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 def get_new_cursor():
     curr_db = Database()
-    curr_db.set_cursor(db.get_cursor())
     return curr_db
 
 @app.route("/items")
