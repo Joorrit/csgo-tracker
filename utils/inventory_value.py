@@ -33,7 +33,7 @@ class InventoryValue:
         return {
             "timestamp": self.timestamp,
             "inventory_value": self.inventory_value,
-            "invested_capital": self.invested_capital,
-            "liquid_funds": self.liquid_funds
+            "liquid_funds": self.liquid_funds,
+            "invested_capital": self.invested_capital
         }
         
