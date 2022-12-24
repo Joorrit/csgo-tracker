@@ -26,7 +26,8 @@ def get_inventory_value():
     timestamp=datetime.datetime.now()
     inventory_value = sum(db.get_position_value(item.get_item_id()).get_position_value() for item in db.get_items())
     invested_capital = db.get_invested_capital_for_timestamp(timestamp)
-    db.insert_inventory_value(InventoryValue(timestamp, inventory_value, invested_capital))
+    liquid_funds = db.get_liquid_funds_for_timestamp(timestamp)
+    db.insert_inventory_value(InventoryValue(timestamp, inventory_value, liquid_funds,invested_capital))
     db.commit()
     db.disconnect()
 

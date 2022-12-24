@@ -35,7 +35,7 @@ class Database:
 
     def insert_inventory_value(self, inventory_value: InventoryValue):
         """Insert an inventory value into the database."""
-        self.cursor.execute("REPLACE INTO inventory_value VALUES (%s, %s, %s)", (inventory_value.get_timestamp(), inventory_value.get_inventory_value(), inventory_value.get_invested_capital(), ))
+        self.cursor.execute("REPLACE INTO inventory_value VALUES (%s, %s, %s, %s)", (inventory_value.get_timestamp(), inventory_value.get_inventory_value(), inventory_value.get_liquid_funds(),inventory_value.get_invested_capital(), ))
 
     def insert_fund_transfer(self, amount, timestamp, transfer_type: "deposit" or "withdrawal"):
         """Insert a fund transfer into the database."""
@@ -138,7 +138,12 @@ class Database:
         """Get the inventory value history from the database."""
         self.cursor.execute("SELECT * FROM inventory_value")
         for db_inventory_value in self.cursor.fetchall():
-            yield InventoryValue(db_inventory_value[0],db_inventory_value[1],db_inventory_value[2])
+            yield InventoryValue(db_inventory_value[0],db_inventory_value[1],db_inventory_value[2], db_inventory_value[3])
+
+    def get_liquid_funds_for_timestamp(self, timestamp):
+        """Get the liquid funds from the database."""
+        self.cursor.execute("SELECT ( SELECT COALESCE(SUM(transfer_amount), 0) FROM fund_transfer tf1 WHERE tf1.transfer_type = 'deposit' AND TIMESTAMP <= %s ) -( SELECT COALESCE(SUM(transfer_amount), 0) FROM fund_transfer tf2 WHERE tf2.transfer_type = 'withdraw' AND TIMESTAMP <= %s ) +( SELECT COALESCE(SUM(TRUNCATE(price*0.975,2) * quantity), 0) FROM `order` o WHERE o.order_type = 'sell' AND TIMESTAMP <= %s ) -( SELECT COALESCE(SUM(price * quantity), 0) FROM `order` o WHERE o.order_type = 'buy' AND TIMESTAMP <= %s ) AS liquid_funds FROM fund_transfer", (timestamp,timestamp,timestamp,timestamp))
+        return round(self.cursor.fetchone()[0],2)
 
     def get_positions_information(self):
         """Get information to all positions from the database. Information consists of

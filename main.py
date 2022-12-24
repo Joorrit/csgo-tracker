@@ -62,8 +62,9 @@ def get_inventory_value_for_timestamp(timestamp):
         total_value += position_size.get_position_size() * (price_map[curr_item_id].get_price() if(curr_item_id in price_map) else 0)
         #print(curr_item_id, total_value)
     total_value = round(total_value, 2)
-    db.insert_inventory_value(InventoryValue(timestamp, total_value, invested_capital))
-    return InventoryValue(timestamp, total_value, invested_capital)
+    liquid_funds = round(db.get_liquid_funds_for_timestamp(timestamp), 2)
+    db.insert_inventory_value(InventoryValue(timestamp, total_value, liquid_funds,invested_capital))
+    return InventoryValue(timestamp, total_value, liquid_funds,invested_capital)
 
 def get_inventory_history_values(start_datetime, end_datetime):
     """Get the inventar value for a specific timestamp."""
