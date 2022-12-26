@@ -138,3 +138,12 @@ class Database:
         self.cursor.execute("SELECT * FROM inventory_value")
         for db_inventory_value in self.cursor.fetchall():
             yield InventoryValue(db_inventory_value[0],db_inventory_value[1],db_inventory_value[2])
+
+    def insert_exchange_rate(self, exchange_rate):
+        """Insert the exchange rate from the database."""
+        self.cursor.execute("INSERT INTO exchange_rate (exchange_rate) VALUES (%s)", (exchange_rate,))
+    
+    def get_exchange_rate(self):
+        """Get the exchange rate from the database."""
+        self.cursor.execute("SELECT exchange_rate FROM exchange_rate ORDER BY `timestamp` DESC LIMIT 1")
+        return self.cursor.fetchone()[0]
