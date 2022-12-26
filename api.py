@@ -80,6 +80,13 @@ def get_positions_information():
     position_values = cursor.get_positions_information()
     return {"data": list(map(lambda position_value: position_value.to_json(), position_values))}
 
+@app.route("/inventory/positions_information/<item_id>")
+def get_position_information(item_id):
+    """returns the position information of the item with the given id in json format"""
+    cursor = get_new_cursor()
+    position_value = cursor.get_position_information(item_id)
+    return position_value.to_json()
+
 @app.route("/deposit", methods=["POST"])
 def add_fund():
     """adds an entry with the given amount to the fund transfer table as a deposit"""
