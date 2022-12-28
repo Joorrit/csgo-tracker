@@ -133,6 +133,13 @@ def buy_item():
         return "success"
     return "failure"
 
+@app.route("/exchange_rate")
+def get_exchange_rate():
+    """returns the exchange rate in json format"""
+    cursor = get_new_cursor()
+    exchange_rate = cursor.get_exchange_rate()
+    return {"data": exchange_rate}
+
 if __name__ == "__main__":
     app.run()
     # if sys.flags.dev_mode:

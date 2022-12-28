@@ -1,6 +1,7 @@
 """Gets executed to scrape the API for all items and insert them into the database"""
 
 import datetime
+import requests
 from utils.database import Database
 from utils.exeptions.api_exeption import MaxRetries
 from utils.inventory_value import InventoryValue
@@ -32,8 +33,20 @@ def get_inventory_value():
     db.commit()
     db.disconnect()
 
+def get_exchange_rate():
+    """gets the exchange rate from api and saves it in the database"""
+    try :
+        res = requests.get("https://v6.exchangerate-api.com/v6/0906f918b7251c4b9ec9cd4c/pair/EUR/CNY", timeout=10)
+        data = res.json()
+        exchange_rate = data["conversion_rate"]
+        db.insert_exchange_rate(exchange_rate)
+        db.commit()
+    except Exception as exception:
+        print(exception)
+
 
 if __name__ == "__main__":
-    #get_all_sell_price_stamps()
+    get_exchange_rate()
+    get_all_sell_price_stamps()
     get_inventory_value()
     

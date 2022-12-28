@@ -140,6 +140,15 @@ class Database:
         for db_inventory_value in self.cursor.fetchall():
             yield InventoryValue(db_inventory_value[0],db_inventory_value[1],db_inventory_value[2], db_inventory_value[3])
 
+    def insert_exchange_rate(self, exchange_rate):
+        """Insert the exchange rate from the database."""
+        self.cursor.execute("INSERT INTO exchange_rate (exchange_rate) VALUES (%s)", (exchange_rate,))
+    
+    def get_exchange_rate(self):
+        """Get the exchange rate from the database."""
+        self.cursor.execute("SELECT exchange_rate FROM exchange_rate ORDER BY `timestamp` DESC LIMIT 1")
+        return self.cursor.fetchone()[0]
+
     def get_liquid_funds_for_timestamp(self, timestamp):
         """Get the liquid funds from the database."""
         self.cursor.execute("SELECT(SELECT COALESCE(SUM(transfer_amount), 0) FROM fund_transfer tf1 WHERE tf1.transfer_type = 'deposit' AND TIMESTAMP <= %s) -( SELECT COALESCE(SUM(transfer_amount), 0) FROM fund_transfer tf2 WHERE tf2.transfer_type = 'withdraw' AND TIMESTAMP <= %s) +( SELECT COALESCE( SUM( TRUNCATE (price * 0.975, 2) * quantity ), 0 ) FROM `order` o WHERE o.order_type = 'sell' AND TIMESTAMP <= %s) -( SELECT COALESCE(SUM(price * quantity), 0) FROM `order` o WHERE o.order_type = 'buy' AND TIMESTAMP <= %s)", (timestamp,timestamp,timestamp,timestamp))
