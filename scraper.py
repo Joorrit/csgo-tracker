@@ -34,6 +34,6 @@ def get_inventory_value():
 
 
 if __name__ == "__main__":
-    get_all_sell_price_stamps()
+    #get_all_sell_price_stamps()
     get_inventory_value()
     
