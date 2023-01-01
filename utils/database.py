@@ -166,4 +166,12 @@ class Database:
             item_id, name, icon_url, position_size, purchase_price, current_price, prev_day_price."""
         self.cursor.execute("""SELECT i.item_id, name, icon_url, SUM(quantity) AS position_size, (SELECT SUM(quantity * price) / SUM(quantity) FROM `order` od WHERE quantity > 0 and o.item_id = od.item_id GROUP BY item_id ) AS purchase_price, ( SELECT price FROM price p1 WHERE p1.item_id = i.item_id ORDER BY TIMESTAMP DESC LIMIT 1 ) AS currentPrice,( SELECT price FROM price p1 WHERE p1.item_id = i.item_id AND p1.timestamp < DATE(NOW()) ORDER BY p1.timestamp DESC LIMIT 1) AS prev_day_price FROM item i, `order` o WHERE i.item_id = o.item_id AND i.item_id = %s GROUP BY i.item_id HAVING position_size > 0""", (item_id,))
         position_information = self.cursor.fetchone()
-        return PositionInformation(Item(position_information[0],position_information[1],position_information[2]),int(position_information[3]),position_information[4],position_information[5],position_information[6])
+        self.cursor.execute("SELECT * FROM `order` WHERE item_id = %s", (item_id,))
+        order_history = [Order(db_order[1], db_order[3], db_order[4], db_order[5], db_order[2]) for db_order in self.cursor.fetchall()]
+        return PositionInformation(Item(position_information[0],position_information[1],position_information[2]),int(position_information[3]),position_information[4],position_information[5],position_information[6], order_history)
+    
+    def get_orders_for_item_id(self, item_id):
+        """Get all orders for a specific item_id from the database."""
+        self.cursor.execute("SELECT * FROM `order` WHERE item_id = %s", (item_id,))
+        for db_order in self.cursor.fetchall():
+            yield Order(db_order[1], db_order[3], db_order[4], db_order[5], db_order[2])

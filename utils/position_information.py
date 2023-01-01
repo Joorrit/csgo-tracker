@@ -2,12 +2,13 @@
 
 class PositionInformation():
     """includes the all the informations of a position in the inventory"""
-    def __init__(self, item, position_size, purchase_price, current_price, prev_day_price):
+    def __init__(self, item, position_size, purchase_price, current_price, prev_day_price, order_history):
         self.item = item
         self.position_size = position_size
         self.purchase_price = purchase_price
         self.current_price = current_price
         self.prev_day_price = prev_day_price
+        self.order_history = order_history
     
     def to_json(self):
         """returns the position information in json format"""
@@ -16,5 +17,6 @@ class PositionInformation():
             "position_size": self.position_size,
             "purchase_price": self.purchase_price,
             "current_price": self.current_price,
-            "prev_day_price": self.prev_day_price
+            "prev_day_price": self.prev_day_price,
+            "order_history": list(map(lambda order: order.to_json(), self.order_history))
         }
