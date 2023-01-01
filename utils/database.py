@@ -159,7 +159,7 @@ class Database:
             item_id, name, icon_url, position_size, purchase_price, current_price, prev_day_price."""
         self.cursor.execute("""SELECT i.item_id, name, icon_url, SUM(quantity) AS position_size, (SELECT SUM(quantity * price) / SUM(quantity) FROM `order` od WHERE quantity > 0 and o.item_id = od.item_id GROUP BY item_id ) AS purchase_price, ( SELECT price FROM price p1 WHERE p1.item_id = i.item_id ORDER BY TIMESTAMP DESC LIMIT 1 ) AS currentPrice,( SELECT price FROM price p1 WHERE p1.item_id = i.item_id AND p1.timestamp < DATE(NOW()) ORDER BY p1.timestamp DESC LIMIT 1) AS prev_day_price FROM item i, `order` o WHERE i.item_id = o.item_id GROUP BY i.item_id HAVING position_size > 0""")
         for position_information in self.cursor.fetchall():
-            yield PositionInformation(Item(position_information[0],position_information[1],position_information[2]),int(position_information[3]),position_information[4],position_information[5],position_information[6])
+            yield PositionInformation(Item(position_information[0],position_information[1],position_information[2]),int(position_information[3]),position_information[4],position_information[5],position_information[6], [])
     
     def get_position_information(self, item_id):
         """Get information to a specific position from the database. Information consists of
