@@ -4,6 +4,7 @@ import mysql.connector
 from secret import MYSQL_DATABASE, MYSQL_HOST, MYSQL_PASSWORD, MYSQL_USER
 
 from utils.item import Item
+from utils.player_count import PlayerCount
 from utils.price_stamp import PriceStamp
 from utils.order import Order
 from utils.position_size import PositionSize
@@ -167,3 +168,7 @@ class Database:
         self.cursor.execute("""SELECT i.item_id, name, icon_url, SUM(quantity) AS position_size, (SELECT SUM(quantity * price) / SUM(quantity) FROM `order` od WHERE quantity > 0 and o.item_id = od.item_id GROUP BY item_id ) AS purchase_price, ( SELECT price FROM price p1 WHERE p1.item_id = i.item_id ORDER BY TIMESTAMP DESC LIMIT 1 ) AS currentPrice,( SELECT price FROM price p1 WHERE p1.item_id = i.item_id AND p1.timestamp < DATE(NOW()) ORDER BY p1.timestamp DESC LIMIT 1) AS prev_day_price FROM item i, `order` o WHERE i.item_id = o.item_id AND i.item_id = %s GROUP BY i.item_id HAVING position_size > 0""", (item_id,))
         position_information = self.cursor.fetchone()
         return PositionInformation(Item(position_information[0],position_information[1],position_information[2]),int(position_information[3]),position_information[4],position_information[5],position_information[6])
+
+    def insert_player_count(self, player_count: PlayerCount):
+        """Insert the player count into the database."""
+        self.cursor.execute("INSERT IGNORE INTO player_count (timestamp, count) VALUES (%s, %s)", (player_count.get_timestamp(), player_count.get_count()))

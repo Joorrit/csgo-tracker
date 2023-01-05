@@ -2,9 +2,11 @@
 
 import datetime
 import requests
+import json
 from utils.database import Database
 from utils.exeptions.api_exeption import MaxRetries
 from utils.inventory_value import InventoryValue
+from utils.player_count import PlayerCount
 
 db = Database()
 
@@ -44,9 +46,26 @@ def get_exchange_rate():
     except Exception as exception:
         print(exception)
 
+def get_player_count():
+    """gets the player count from api and saves it in the database"""
+    try :
+        res = requests.get("https://steamcharts.com/app/730/chart-data.json", timeout=10)
+        entrys = json.loads(res.text)
+        for entry in entrys:
+            # convert 1341100800000 to datetime
+            timestamp = datetime.datetime.fromtimestamp(entry[0]/1000)
+
+            count = entry[1]
+            player_count = PlayerCount(timestamp, count)
+            db.insert_player_count(player_count)
+        db.commit()
+    except Exception as exception:
+        print(exception)
+
 
 if __name__ == "__main__":
     get_exchange_rate()
     get_all_sell_price_stamps()
     get_inventory_value()
+    get_player_count()
     
