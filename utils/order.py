@@ -37,7 +37,7 @@ class Order:
         return {
             "item_id": self.item_id,
             "quantity": self.quantity,
-            "purchase_price": self.purchase_price,
+            "item_price": self.purchase_price,
             "timestamp": self.timestamp,
             "order_type": self.order_type
         }

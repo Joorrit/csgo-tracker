@@ -140,6 +140,13 @@ def get_exchange_rate():
     exchange_rate = cursor.get_exchange_rate()
     return {"data": exchange_rate}
 
+@app.route("/inventory/positions_information/<item_id>/order_history")
+def get_order_history_for_item_id(item_id):
+    """returns the order history of the item with the given id in json format"""
+    cursor = get_new_cursor()
+    order_stamps = cursor.get_orders_for_item_id(item_id)
+    return {"data": list(map(lambda order_stamp: order_stamp.to_json(), order_stamps))}
+
 if __name__ == "__main__":
     app.run()
     # if sys.flags.dev_mode:

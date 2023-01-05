@@ -6,11 +6,11 @@ from utils.exeptions.api_exeption import MaxRetries
 from utils.item import Item
 from utils.order import Order
 from utils.inventory_value import InventoryValue
-from utils.item_ids import item_ids
+#from utils.item_ids import item_ids
 
 db = Database()
 
-def get_initial_items():
+def get_initial_items(item_ids):
     """Get the initial items from the itemIds list and insert them into the database."""
     for item_id in item_ids:
         item = Item(item_id)
@@ -83,7 +83,7 @@ def add_order_in_retrospect(item_id, order_size, order_price, order_timestamp, o
     get_inventory_history_values(db.get_first_timestamp(), datetime.now())
 
 if __name__ == "__main__":
-    # get_initial_items()
+    get_initial_items([875966])
     # startTime = time.time()
-    get_inventory_history_values(db.get_first_timestamp(), datetime.now())
+    # get_inventory_history_values(db.get_first_timestamp(), datetime.now())
     # print(time.time() - startTime)

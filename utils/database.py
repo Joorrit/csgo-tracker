@@ -24,7 +24,7 @@ class Database:
             auth_plugin='mysql_native_password'
         )
         self.connection = mydb
-        self.cursor = mydb.cursor()
+        self.cursor = mydb.cursor(buffered=True)
 
     def get_cursor(self):
         """Returns the cursor of the database object."""
@@ -152,22 +152,30 @@ class Database:
 
     def get_liquid_funds_for_timestamp(self, timestamp):
         """Get the liquid funds from the database."""
-        self.cursor.execute("SELECT ( SELECT COALESCE(SUM(transfer_amount), 0) FROM fund_transfer tf1 WHERE tf1.transfer_type = 'deposit' AND TIMESTAMP <= %s ) -( SELECT COALESCE(SUM(transfer_amount), 0) FROM fund_transfer tf2 WHERE tf2.transfer_type = 'withdraw' AND TIMESTAMP <= %s ) +( SELECT COALESCE(SUM(TRUNCATE(price*0.975,2) * quantity), 0) FROM `order` o WHERE o.order_type = 'sell' AND TIMESTAMP <= %s ) -( SELECT COALESCE(SUM(price * quantity), 0) FROM `order` o WHERE o.order_type = 'buy' AND TIMESTAMP <= %s ) AS liquid_funds FROM fund_transfer", (timestamp,timestamp,timestamp,timestamp))
+        self.cursor.execute("SELECT(SELECT COALESCE(SUM(transfer_amount), 0) FROM fund_transfer tf1 WHERE tf1.transfer_type = 'deposit' AND TIMESTAMP <= %s) -( SELECT COALESCE(SUM(transfer_amount), 0) FROM fund_transfer tf2 WHERE tf2.transfer_type = 'withdraw' AND TIMESTAMP <= %s) +( SELECT COALESCE( SUM( TRUNCATE (price * 0.975, 2) * quantity ), 0 ) FROM `order` o WHERE o.order_type = 'sell' AND TIMESTAMP <= %s) -( SELECT COALESCE(SUM(price * quantity), 0) FROM `order` o WHERE o.order_type = 'buy' AND TIMESTAMP <= %s)", (timestamp,timestamp,timestamp,timestamp))
         return round(self.cursor.fetchone()[0],2)
 
     def get_positions_information(self):
         """Get information to all positions from the database. Information consists of
             item_id, name, icon_url, position_size, purchase_price, current_price, prev_day_price."""
-        self.cursor.execute("""SELECT i.item_id, name, icon_url, SUM(quantity) AS position_size, (SELECT SUM(quantity * price) / SUM(quantity) FROM `order` od WHERE quantity > 0 and o.item_id = od.item_id GROUP BY item_id ) AS purchase_price, ( SELECT price FROM price p1 WHERE p1.item_id = i.item_id ORDER BY TIMESTAMP DESC LIMIT 1 ) AS currentPrice,( SELECT price FROM price p1 WHERE p1.item_id = i.item_id AND p1.timestamp < DATE(NOW()) ORDER BY p1.timestamp DESC LIMIT 1) AS prev_day_price FROM item i, `order` o WHERE i.item_id = o.item_id GROUP BY i.item_id HAVING position_size > 0""")
+        self.cursor.execute("""SELECT i.item_id, NAME, icon_url, SUM(quantity) AS position_size, ( SELECT SUM(quantity * price) / SUM(quantity) FROM `order` od WHERE quantity > 0 AND o.item_id = od.item_id GROUP BY item_id ) AS purchase_price, ( SELECT price FROM price p1 WHERE p1.item_id = i.item_id ORDER BY TIMESTAMP DESC LIMIT 1 ) AS currentPrice,( SELECT highest_bargain_price FROM price p1 WHERE p1.item_id = i.item_id ORDER BY TIMESTAMP DESC LIMIT 1 ) AS currentHighestBargainPrice,( SELECT price FROM price p1 WHERE p1.item_id = i.item_id AND p1.timestamp < DATE(NOW()) ORDER BY p1.timestamp DESC LIMIT 1) AS prev_day_price FROM item i, `order` o WHERE i.item_id = o.item_id GROUP BY i.item_id HAVING position_size > 0""")
         for position_information in self.cursor.fetchall():
-            yield PositionInformation(Item(position_information[0],position_information[1],position_information[2]),int(position_information[3]),position_information[4],position_information[5],position_information[6])
+            yield PositionInformation(Item(position_information[0],position_information[1],position_information[2]),int(position_information[3]),position_information[4],position_information[5],position_information[6], position_information[7],[])
     
     def get_position_information(self, item_id):
         """Get information to a specific position from the database. Information consists of
-            item_id, name, icon_url, position_size, purchase_price, current_price, prev_day_price."""
-        self.cursor.execute("""SELECT i.item_id, name, icon_url, SUM(quantity) AS position_size, (SELECT SUM(quantity * price) / SUM(quantity) FROM `order` od WHERE quantity > 0 and o.item_id = od.item_id GROUP BY item_id ) AS purchase_price, ( SELECT price FROM price p1 WHERE p1.item_id = i.item_id ORDER BY TIMESTAMP DESC LIMIT 1 ) AS currentPrice,( SELECT price FROM price p1 WHERE p1.item_id = i.item_id AND p1.timestamp < DATE(NOW()) ORDER BY p1.timestamp DESC LIMIT 1) AS prev_day_price FROM item i, `order` o WHERE i.item_id = o.item_id AND i.item_id = %s GROUP BY i.item_id HAVING position_size > 0""", (item_id,))
+            item_id, name, icon_url, position_size, purchase_price, current_price, prev_day_price, order_history."""
+        self.cursor.execute("""SELECT i.item_id, NAME, icon_url, SUM(quantity) AS position_size, ( SELECT SUM(quantity * price) / SUM(quantity) FROM `order` od WHERE quantity > 0 AND o.item_id = od.item_id GROUP BY item_id ) AS purchase_price, ( SELECT price FROM price p1 WHERE p1.item_id = i.item_id ORDER BY TIMESTAMP DESC LIMIT 1 ) AS currentPrice,( SELECT highest_bargain_price FROM price p1 WHERE p1.item_id = i.item_id ORDER BY TIMESTAMP DESC LIMIT 1 ) AS currentHighestBargainPrice,( SELECT price FROM price p1 WHERE p1.item_id = i.item_id AND p1.timestamp < DATE(NOW()) ORDER BY p1.timestamp DESC LIMIT 1) AS prev_day_price FROM item i, `order` o WHERE i.item_id = o.item_id AND i.item_id = %s GROUP BY i.item_id HAVING position_size > 0""", (item_id,))
         position_information = self.cursor.fetchone()
-        return PositionInformation(Item(position_information[0],position_information[1],position_information[2]),int(position_information[3]),position_information[4],position_information[5],position_information[6])
+        self.cursor.execute("SELECT * FROM `order` WHERE item_id = %s", (item_id,))
+        order_history = [Order(db_order[1], db_order[3], db_order[4], db_order[5], db_order[2]) for db_order in self.cursor.fetchall()]
+        return PositionInformation(Item(position_information[0],position_information[1],position_information[2]),int(position_information[3]),position_information[4],position_information[5],position_information[6],position_information[7], order_history)
+    
+    def get_orders_for_item_id(self, item_id):
+        """Get all orders for a specific item_id from the database."""
+        self.cursor.execute("SELECT * FROM `order` WHERE item_id = %s", (item_id,))
+        for db_order in self.cursor.fetchall():
+            yield Order(db_order[1], db_order[3], db_order[4], db_order[5], db_order[2])
 
     def insert_player_count(self, player_count: PlayerCount):
         """Insert the player count into the database."""
