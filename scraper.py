@@ -33,7 +33,6 @@ def get_inventory_value():
     #timestamp = timestamp.replace(minute=0, second=0, microsecond=0)
     db.insert_inventory_value(InventoryValue(timestamp, inventory_value, liquid_funds,invested_capital))
     db.commit()
-    db.disconnect()
 
 def get_exchange_rate():
     """gets the exchange rate from api and saves it in the database"""
@@ -52,9 +51,7 @@ def get_player_count():
         res = requests.get("https://steamcharts.com/app/730/chart-data.json", timeout=10)
         entrys = json.loads(res.text)
         for entry in entrys:
-            # convert 1341100800000 to datetime
             timestamp = datetime.datetime.fromtimestamp(entry[0]/1000)
-
             count = entry[1]
             player_count = PlayerCount(timestamp, count)
             db.insert_player_count(player_count)
@@ -68,4 +65,5 @@ if __name__ == "__main__":
     get_all_sell_price_stamps()
     get_inventory_value()
     get_player_count()
+    db.disconnect()
     
