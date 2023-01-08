@@ -151,7 +151,7 @@ class Database:
 
     def get_liquid_funds_for_timestamp(self, timestamp):
         """Get the liquid funds from the database."""
-        self.cursor.execute("SELECT(SELECT COALESCE(SUM(transfer_amount), 0) FROM fund_transfer tf1 WHERE tf1.transfer_type = 'deposit' AND TIMESTAMP <= %s) -( SELECT COALESCE(SUM(transfer_amount), 0) FROM fund_transfer tf2 WHERE tf2.transfer_type = 'withdraw' AND TIMESTAMP <= %s) +( SELECT COALESCE( SUM( TRUNCATE (price * 0.975, 2) * quantity ), 0 ) FROM `order` o WHERE o.order_type = 'sell' AND TIMESTAMP <= %s) -( SELECT COALESCE(SUM(price * quantity), 0) FROM `order` o WHERE o.order_type = 'buy' AND TIMESTAMP <= %s)", (timestamp,timestamp,timestamp,timestamp))
+        self.cursor.execute("SELECT(SELECT COALESCE(SUM(transfer_amount), 0) FROM fund_transfer tf1 WHERE tf1.transfer_type = 'deposit' AND TIMESTAMP <= %s) -( SELECT COALESCE(SUM(transfer_amount), 0) FROM fund_transfer tf2 WHERE tf2.transfer_type = 'withdraw' AND TIMESTAMP <= %s) -( SELECT COALESCE( SUM( TRUNCATE (price * 0.975, 2) * quantity ), 0 ) FROM `order` o WHERE o.order_type = 'sell' AND TIMESTAMP <= %s) -( SELECT COALESCE(SUM(price * quantity), 0) FROM `order` o WHERE o.order_type = 'buy' AND TIMESTAMP <= %s)", (timestamp,timestamp,timestamp,timestamp))
         return round(self.cursor.fetchone()[0],2)
 
     def get_positions_information(self):
