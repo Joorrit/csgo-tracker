@@ -99,7 +99,8 @@ class Database:
 
     def get_position_size(self, item_id):
         """Get the position size for an item from the database."""
-        self.cursor.execute("""SELECT (SELECT COALESCE(SUM(quantity),0) FROM `order` WHERE item_id = %s AND order_type = 'buy') - (SELECT COALESCE(SUM(quantity),0) FROM `order` WHERE item_id = %s AND order_type = 'sell')""", (item_id, item_id))
+        # self.cursor.execute("""SELECT (SELECT COALESCE(SUM(quantity),0) FROM `order` WHERE item_id = %s AND order_type = 'buy') - (SELECT COALESCE(SUM(quantity),0) FROM `order` WHERE item_id = %s AND order_type = 'sell')""", (item_id, item_id))
+        self.cursor.execute("""SELECT SUM(quantity) FROM `order` WHERE item_id = %s""", (item_id,))
         return PositionSize(item_id, int(self.cursor.fetchone()[0]))
     
     def get_position_value(self, item_id):
