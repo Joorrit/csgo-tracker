@@ -4,6 +4,7 @@ import mysql.connector
 from secret import MYSQL_DATABASE, MYSQL_HOST, MYSQL_PASSWORD, MYSQL_USER
 
 from utils.item import Item
+from utils.player_count import PlayerCount
 from utils.price_stamp import PriceStamp
 from utils.order import Order
 from utils.position_size import PositionSize
@@ -175,3 +176,7 @@ class Database:
         self.cursor.execute("SELECT * FROM `order` WHERE item_id = %s", (item_id,))
         for db_order in self.cursor.fetchall():
             yield Order(db_order[1], db_order[3], db_order[4], db_order[5], db_order[2])
+
+    def insert_player_count(self, player_count: PlayerCount):
+        """Insert the player count into the database."""
+        self.cursor.execute("INSERT IGNORE INTO player_count (timestamp, count) VALUES (%s, %s)", (player_count.get_timestamp(), player_count.get_count()))
