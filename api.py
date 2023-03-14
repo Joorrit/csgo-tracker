@@ -16,7 +16,7 @@ def get_new_cursor():
     curr_db = Database()
     return curr_db
 
-@app.route("/items")
+@app.route("/api/items")
 def get_items():
     """returns all items in the database in json format"""
     cursor = get_new_cursor()
@@ -24,70 +24,70 @@ def get_items():
     result = {"data": list(map(lambda item: item.to_json(), items))}
     return result
 
-@app.route("/items/<item_id>")
+@app.route("/api/items/<item_id>")
 def get_item(item_id):
     """returns the item with the given id in json format"""
     cursor = get_new_cursor()
     item = cursor.get_item(item_id)
     return item.to_json()
 
-@app.route("/items/<item_id>/price_history")
+@app.route("/api/items/<item_id>/price_history")
 def get_item_price_history(item_id):
     """returns the price history of the item with the given id in json format"""
     cursor = get_new_cursor()
     price_stamps = cursor.get_price_stamps(item_id)
     return {"data": list(map(lambda price_stamp: price_stamp.to_json(), price_stamps))}
 
-@app.route("/items/<item_id>/price")
+@app.route("/api/items/<item_id>/price")
 def get_item_price(item_id):
     """returns the latest price of the item with the given id in json format"""
     cursor = get_new_cursor()
     price_stamp = cursor.get_latest_price_stamp(item_id)
     return price_stamp.to_json()
 
-@app.route("/items/<item_id>/order_history")
+@app.route("/api/items/<item_id>/order_history")
 def get_item_order_history(item_id):
     """returns the order history of the item with the given id in json format"""
     cursor = get_new_cursor()
     order_stamps = cursor.get_order_stamps(item_id)
     return {"data": list(map(lambda order_stamp: order_stamp.to_json(), order_stamps))}
 
-@app.route("/items/<item_id>/position_size")
+@app.route("/api/items/<item_id>/position_size")
 def get_item_position_size(item_id):
     """returns the position size of the item with the given id in json format"""
     cursor = get_new_cursor()
     position_size = cursor.get_position_size(item_id)
     return position_size.to_json()
 
-@app.route("/items/<item_id>/position_value")
+@app.route("/api/items/<item_id>/position_value")
 def get_item_position_value(item_id):
     """returns the position value of the item with the given id in json format"""
     cursor = get_new_cursor()
     position_value = cursor.get_position_value(item_id)
     return position_value.to_json()
 
-@app.route("/inventory/inventory_value_history")
+@app.route("/api/inventory/inventory_value_history")
 def get_inventory_value_history():
     """returns the inventory value history in json format"""
     cursor = get_new_cursor()
     inventory_value_history = cursor.get_inventory_value_history()
     return {"data": list(map(lambda inventory_value: inventory_value.to_json(), inventory_value_history))}
 
-@app.route("/inventory/positions_information")
+@app.route("/api/inventory/positions_information")
 def get_positions_information():
     """returns the items and position informations in json format"""
     cursor = get_new_cursor()
     position_values = cursor.get_positions_information()
     return {"data": list(map(lambda position_value: position_value.to_json(), position_values))}
 
-@app.route("/inventory/positions_information/<item_id>")
+@app.route("/api/inventory/positions_information/<item_id>")
 def get_position_information(item_id):
     """returns the position information of the item with the given id in json format"""
     cursor = get_new_cursor()
     position_value = cursor.get_position_information(item_id)
     return position_value.to_json()
 
-@app.route("/deposit", methods=["POST"])
+@app.route("/api/deposit", methods=["POST"])
 def add_fund():
     """adds an entry with the given amount to the fund transfer table as a deposit"""
     if request.method == 'POST':
@@ -98,7 +98,7 @@ def add_fund():
         return "success"
     return "failure"
 
-@app.route("/withdraw", methods=["POST"])
+@app.route("/api/withdraw", methods=["POST"])
 def withdraw_fund():
     """adds an entry with the given amount to the fund transfer table as a withdraw"""
     if request.method == 'POST':
@@ -109,7 +109,7 @@ def withdraw_fund():
         return "success"
     return "failure"
 
-@app.route("/buy_order", methods=["POST"])
+@app.route("/api/buy_order", methods=["POST"])
 def buy_item():
     """adds an order to the order table as a buy order"""
     if request.method == 'POST':
@@ -133,14 +133,14 @@ def buy_item():
         return "success"
     return "failure"
 
-@app.route("/exchange_rate")
+@app.route("/api/exchange_rate")
 def get_exchange_rate():
     """returns the exchange rate in json format"""
     cursor = get_new_cursor()
     exchange_rate = cursor.get_exchange_rate()
     return {"data": exchange_rate}
 
-@app.route("/inventory/positions_information/<item_id>/order_history")
+@app.route("/api/inventory/positions_information/<item_id>/order_history")
 def get_order_history_for_item_id(item_id):
     """returns the order history of the item with the given id in json format"""
     cursor = get_new_cursor()
