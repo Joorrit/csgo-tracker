@@ -83,7 +83,7 @@ def add_order_in_retrospect(item_id, order_size, order_price, order_timestamp, o
     get_inventory_history_values(db.get_first_timestamp(), datetime.now())
 
 if __name__ == "__main__":
-    get_initial_items([875966])
+    get_initial_items([35018])
     # startTime = time.time()
     # get_inventory_history_values(db.get_first_timestamp(), datetime.now())
     # print(time.time() - startTime)
