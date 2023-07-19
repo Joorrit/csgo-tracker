@@ -2,15 +2,16 @@
 
 class Order:
     "Position class with item id and position size"
-    def __init__(self, item_id, quantity, purchase_price, timestamp, order_type):
+    def __init__(self, item_id, quantity, purchase_price, timestamp, order_type, user_id):
         self.item_id = item_id
         self.quantity = quantity
         self.purchase_price = purchase_price
         self.timestamp = timestamp
         self.order_type = order_type
+        self.user_id = user_id
     
     def __str__(self):
-        return f"Order: {self.item_id}, {self.quantity}, {self.purchase_price}, {self.timestamp}, {self.order_type}"
+        return f"Order: {self.item_id}, {self.quantity}, {self.purchase_price}, {self.timestamp}, {self.order_type}, {self.user_id}"
 
     def get_item_id(self):
         "returns the item id of the position"
@@ -32,6 +33,10 @@ class Order:
         "returns the position size of the position"
         return self.order_type
     
+    def get_user_id(self):
+        "returns the position size of the position"
+        return self.user_id
+    
     def to_json(self):
         "returns the position as json"
         return {
@@ -39,5 +44,6 @@ class Order:
             "quantity": self.quantity,
             "item_price": self.purchase_price,
             "timestamp": self.timestamp,
-            "order_type": self.order_type
+            "order_type": self.order_type,
+            "user_id": self.user_id
         }

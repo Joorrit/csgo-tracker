@@ -3,14 +3,15 @@
 class InventoryValue:
     """Inventory value class"""
 
-    def __init__(self, timestamp, inventory_value, liquid_funds, invested_capital):
+    def __init__(self, timestamp, inventory_value, liquid_funds, invested_capital, user_id):
         self.timestamp = timestamp
         self.inventory_value = inventory_value
         self.liquid_funds = liquid_funds
         self.invested_capital = invested_capital
+        self.user_id = user_id
 
     def __str__(self):
-        return f"InventoryValue: {self.timestamp}, {self.inventory_value}, {self.liquid_funds}, {self.invested_capital}"
+        return f"InventoryValue: {self.timestamp}, {self.inventory_value}, {self.liquid_funds}, {self.invested_capital}, {self.user_id}"
 
     def get_timestamp(self):
         """returns the timestamp"""
@@ -27,6 +28,10 @@ class InventoryValue:
     def get_liquid_funds(self):
         """returns the liquid funds"""
         return self.liquid_funds
+    
+    def get_user_id(self):
+        """returns the user id"""
+        return self.user_id
 
     def to_json(self):
         """returns the inventory value as json"""
@@ -34,6 +39,7 @@ class InventoryValue:
             "timestamp": self.timestamp,
             "inventory_value": self.inventory_value,
             "liquid_funds": self.liquid_funds,
-            "invested_capital": self.invested_capital
+            "invested_capital": self.invested_capital,
+            "user_id": self.user_id
         }
         

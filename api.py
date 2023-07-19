@@ -8,6 +8,7 @@ from flask_cors import CORS
 from utils.database import Database
 from utils.utils import get_timestamp
 from utils.order import Order
+from utils.user import User
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
@@ -46,71 +47,71 @@ def get_item_price(item_id):
     return price_stamp.to_json()
 
 @app.route("/items/<item_id>/order_history")
-def get_item_order_history(item_id):
+def get_item_order_history(item_id, user_id=1):
     """returns the order history of the item with the given id in json format"""
     cursor = get_new_cursor()
-    order_stamps = cursor.get_order_stamps(item_id)
+    order_stamps = cursor.get_order_stamps(item_id, user_id)
     return {"data": list(map(lambda order_stamp: order_stamp.to_json(), order_stamps))}
 
 @app.route("/items/<item_id>/position_size")
-def get_item_position_size(item_id):
+def get_item_position_size(item_id, user_id=1):
     """returns the position size of the item with the given id in json format"""
     cursor = get_new_cursor()
-    position_size = cursor.get_position_size(item_id)
+    position_size = cursor.get_position_size(item_id, user_id)
     return position_size.to_json()
 
 @app.route("/items/<item_id>/position_value")
-def get_item_position_value(item_id):
+def get_item_position_value(item_id, user_id=1):
     """returns the position value of the item with the given id in json format"""
     cursor = get_new_cursor()
-    position_value = cursor.get_position_value(item_id)
+    position_value = cursor.get_position_value(item_id, user_id)
     return position_value.to_json()
 
 @app.route("/inventory/inventory_value_history")
-def get_inventory_value_history():
+def get_inventory_value_history(user_id=1):
     """returns the inventory value history in json format"""
     cursor = get_new_cursor()
-    inventory_value_history = cursor.get_inventory_value_history()
+    inventory_value_history = cursor.get_inventory_value_history(user_id)
     return {"data": list(map(lambda inventory_value: inventory_value.to_json(), inventory_value_history))}
 
 @app.route("/inventory/positions_information")
-def get_positions_information():
+def get_positions_information(user_id=1):
     """returns the items and position informations in json format"""
     cursor = get_new_cursor()
-    position_values = cursor.get_positions_information()
+    position_values = cursor.get_positions_information(user_id)
     return {"data": list(map(lambda position_value: position_value.to_json(), position_values))}
 
 @app.route("/inventory/positions_information/<item_id>")
-def get_position_information(item_id):
+def get_position_information(item_id, user_id=1):
     """returns the position information of the item with the given id in json format"""
     cursor = get_new_cursor()
-    position_value = cursor.get_position_information(item_id)
+    position_value = cursor.get_position_information(item_id, user_id)
     return position_value.to_json()
 
 @app.route("/deposit", methods=["POST"])
-def add_fund():
+def add_fund(user_id=1):
     """adds an entry with the given amount to the fund transfer table as a deposit"""
     if request.method == 'POST':
         cursor = get_new_cursor()
         transfer_amount = request.form.get('transfer_amount')
-        cursor.insert_fund_transfer(transfer_amount, get_timestamp(), "deposit")
+        cursor.insert_fund_transfer(transfer_amount, get_timestamp(), "deposit", user_id)
         cursor.commit()
         return "success"
     return "failure"
 
 @app.route("/withdraw", methods=["POST"])
-def withdraw_fund():
+def withdraw_fund(user_id=1):
     """adds an entry with the given amount to the fund transfer table as a withdraw"""
     if request.method == 'POST':
         cursor = get_new_cursor()
         transfer_amount = request.form.get('transfer_amount')
-        cursor.insert_fund_transfer(transfer_amount, get_timestamp(), "withdraw")
+        cursor.insert_fund_transfer(transfer_amount, get_timestamp(), "withdraw", user_id)
         cursor.commit()
         return "success"
     return "failure"
 
 @app.route("/buy_order", methods=["POST"])
-def buy_item():
+def buy_item(user_id=1):
     """adds an order to the order table as a buy order"""
     if request.method == 'POST':
         cursor = get_new_cursor()
@@ -124,11 +125,27 @@ def buy_item():
         #datediff = datetime.datetime.now()-timestamp
         #TODO: check if items exists in the database, if not, add it and image
         if datediff.days == 0 and datediff.hours == 0:
-            cursor.insert_order(Order(item_id, quantity, price, timestamp, "buy"))
+            cursor.insert_order(Order(item_id, quantity, price, timestamp, "buy", user_id))
             cursor.commit()
             return "success"
-        cursor.insert_order(Order(item_id, quantity, price, timestamp, "buy"))
+        cursor.insert_order(Order(item_id, quantity, price, timestamp, "buy", user_id))
         #TODO: update inventory value table
+        cursor.commit()
+        return "success"
+    return "failure"
+
+@app.route("/user", methods=["POST"])
+def add_user():
+    """adds a user to the user table"""
+    if request.method == 'POST':
+        cursor = get_new_cursor()
+        username = request.form.get('username')
+        password_hash = request.form.get('password_hash')
+        email = request.form.get('email')
+        steam_id = request.form.get('steam_id')
+        created_at = datetime.datetime.utcnow() # or get it from form if you have
+        user = User(username=username, password_hash=password_hash, email=email, steam_id=steam_id, created_at=created_at, last_login=created_at)
+        cursor.insert_user(user)
         cursor.commit()
         return "success"
     return "failure"
@@ -141,10 +158,10 @@ def get_exchange_rate():
     return {"data": exchange_rate}
 
 @app.route("/inventory/positions_information/<item_id>/order_history")
-def get_order_history_for_item_id(item_id):
+def get_order_history_for_item_id(item_id, user_id=1):
     """returns the order history of the item with the given id in json format"""
     cursor = get_new_cursor()
-    order_stamps = cursor.get_orders_for_item_id(item_id)
+    order_stamps = cursor.get_orders_for_item_id(item_id, user_id)
     return {"data": list(map(lambda order_stamp: order_stamp.to_json(), order_stamps))}
 
 if __name__ == "__main__":

@@ -24,14 +24,14 @@ def get_all_sell_price_stamps():
         db.insert_price_stamp(price_stamp)
     db.commit()
 
-def get_inventory_value():
+def get_inventory_value(user_id=1):
     """calculates the latest inventory value."""
     timestamp=datetime.datetime.now()
-    inventory_value = sum(db.get_position_value(item.get_item_id()).get_position_value() for item in db.get_items())
-    invested_capital = db.get_invested_capital_for_timestamp(timestamp)
-    liquid_funds = db.get_liquid_funds_for_timestamp(timestamp)
+    inventory_value = sum(db.get_position_value(item.get_item_id(), user_id).get_position_value() for item in db.get_items())
+    invested_capital = db.get_invested_capital_for_timestamp(timestamp, user_id)
+    liquid_funds = db.get_liquid_funds_for_timestamp(timestamp, user_id)
     #timestamp = timestamp.replace(minute=0, second=0, microsecond=0)
-    db.insert_inventory_value(InventoryValue(timestamp, inventory_value, liquid_funds,invested_capital))
+    db.insert_inventory_value(InventoryValue(timestamp, inventory_value, liquid_funds,invested_capital, user_id))
     db.commit()
 
 def get_exchange_rate():
